@@ -30,7 +30,7 @@
 		</a>
 
 		<!-- Desktop nav -->
-		<div class="hidden items-center gap-1 md:flex">
+		<div class="hidden ml-auto items-center gap-1 md:flex">
 			{#each navLinks as link}
 				<a
 					href={link.href}
