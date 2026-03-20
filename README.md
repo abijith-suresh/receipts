@@ -29,23 +29,27 @@ cp .env.example .env.local
 
 - `PUBLIC_CONVEX_URL`
 - `PUBLIC_CLERK_PUBLISHABLE_KEY`
-- `CLERK_SECRET_KEY`
-- `CLERK_WEBHOOK_SECRET`
+
+Optional if you want explicit route config:
+
+- `PUBLIC_CLERK_SIGN_IN_URL`
+- `PUBLIC_CLERK_SIGN_UP_URL`
+- `PUBLIC_CLERK_AFTER_SIGN_IN_URL`
+- `PUBLIC_CLERK_AFTER_SIGN_UP_URL`
 
 4. In the Convex dashboard, add:
 
-- `CLERK_JWT_ISSUER_DOMAIN`
+- `CLERK_FRONTEND_API_URL`
 
-5. If you are using a Clerk JWT template for Convex, set `PUBLIC_CLERK_JWT_TEMPLATE` in `.env.local`.
-   If you already enabled Clerk's native Convex integration, leave it blank.
+   Use the Frontend API URL shown after you activate the official Convex integration in Clerk.
 
-6. Start Convex and generate backend types:
+5. Start Convex and generate backend types:
 
 ```sh
 bun run convex:dev
 ```
 
-7. In a second terminal, start the frontend:
+6. In a second terminal, start the frontend:
 
 ```sh
 bun run dev

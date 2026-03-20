@@ -1,7 +1,6 @@
 import type { ConvexClient } from 'convex/browser';
 import { writable } from 'svelte/store';
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
 
 import { getClerk } from './clerk';
 
@@ -52,7 +51,6 @@ export function startClerkAuth(convex: ConvexClient) {
 				}
 
 				return await clerk.session.getToken({
-					template: env.PUBLIC_CLERK_JWT_TEMPLATE || undefined,
 					skipCache: forceRefreshToken,
 				});
 			});

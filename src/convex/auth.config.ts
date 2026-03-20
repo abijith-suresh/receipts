@@ -1,10 +1,10 @@
 import type { AuthConfig } from 'convex/server';
 
-const issuerDomain = process.env.CLERK_JWT_ISSUER_DOMAIN;
+const issuerDomain = process.env.CLERK_FRONTEND_API_URL;
 
 if (!issuerDomain) {
 	throw new Error(
-		'CLERK_JWT_ISSUER_DOMAIN must be set in the Convex environment.',
+		'CLERK_FRONTEND_API_URL must be set in the Convex environment.',
 	);
 }
 
