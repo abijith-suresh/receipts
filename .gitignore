@@ -11,12 +11,16 @@ node_modules
 # OS
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
 
 # Env
 .env
 .env.*
 !.env.example
 !.env.test
+
+# Convex
+.convex/
 
 # Vite
 vite.config.js.timestamp-*
