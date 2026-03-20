@@ -122,7 +122,7 @@
 <div class="max-w-2xl mx-auto px-6 pb-16">
 	<div class="flex items-center gap-3 flex-wrap">
 		<span class="text-muted text-sm">More updates coming soon. Built in public.</span>
-		<a href="#" class="text-brand text-sm hover:text-brand-strong transition-colors">
+		<a href="https://github.com/abijith-suresh/receipts" class="text-brand text-sm hover:text-brand-strong transition-colors">
 			Follow progress on GitHub →
 		</a>
 	</div>
