@@ -1,9 +1,6 @@
-import { mutationGeneric, queryGeneric } from 'convex/server';
+import { mutation, query } from './_generated/server';
 
 import { getCurrentUserInfo, requireAuth } from './lib/auth';
-
-const mutation = mutationGeneric;
-const query = queryGeneric;
 
 export const ensureCurrentUser = mutation({
 	args: {},
