@@ -1,5 +1,5 @@
 <script lang="ts">
-import ClerkUserButton from '$lib/components/ClerkUserButton.svelte';
+import { UserButton } from 'svelte-clerk';
 
 const { heading, eyebrow, children } = $props<{
 	heading: string;
@@ -38,7 +38,7 @@ const navItems = [
 							</a>
 						{/each}
 					</nav>
-					<ClerkUserButton />
+					<UserButton />
 				</div>
 			</div>
 		</header>

@@ -1,5 +1,5 @@
 <script lang="ts">
-import ClerkAuthForm from '$lib/components/ClerkAuthForm.svelte';
+import { SignUp } from 'svelte-clerk';
 </script>
 
 <svelte:head>
@@ -17,7 +17,7 @@ import ClerkAuthForm from '$lib/components/ClerkAuthForm.svelte';
 		</div>
 
 		<div class="rounded-[2rem] border border-white/70 bg-white/90 p-4 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur sm:p-6">
-			<ClerkAuthForm variant="sign-up" />
+			<SignUp signInUrl="/sign-in" forceRedirectUrl="/dashboard" />
 		</div>
 	</div>
 </section>

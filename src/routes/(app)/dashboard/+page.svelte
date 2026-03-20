@@ -1,10 +1,18 @@
 <script lang="ts">
 import { useQuery } from 'convex-svelte';
+import { useClerkContext } from 'svelte-clerk';
 
+import { convexAuthReady } from '$lib/auth/convexAuth';
 import EntryTimeline from '$lib/components/EntryTimeline.svelte';
 import { api } from '$lib/convex';
 
-const entries = useQuery(api.logEntries.list, {});
+const clerk = useClerkContext();
+
+const entries = useQuery(
+	api.logEntries.list,
+	() =>
+		clerk.isLoaded && !!clerk.auth.userId && $convexAuthReady ? {} : 'skip',
+);
 </script>
 
 <section class="space-y-6">

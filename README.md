@@ -8,7 +8,7 @@ Phase 1 scaffold for `receipts.cv`: a private work log that helps professionals 
 - Bun for package management and scripts
 - Tailwind CSS v4
 - Convex for database, backend functions, and realtime queries
-- Clerk JS for auth UI and session management
+- `svelte-clerk` for Clerk auth in SvelteKit
 - Vercel adapter for frontend deployment
 
 ## Local setup
@@ -29,6 +29,7 @@ cp .env.example .env.local
 
 - `PUBLIC_CONVEX_URL`
 - `PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
 
 Optional if you want explicit route config:
 

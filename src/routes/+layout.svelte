@@ -3,12 +3,18 @@ import { env } from '$env/dynamic/public';
 import './layout.css';
 import { setupConvex } from 'convex-svelte';
 import favicon from '$lib/assets/favicon.svg';
-import ClerkAuthMount from '$lib/components/ClerkAuthMount.svelte';
+import { ClerkProvider } from 'svelte-clerk';
+
+import ClerkConvexBridge from '$lib/components/ClerkConvexBridge.svelte';
 
 let { children } = $props();
 
 if (!env.PUBLIC_CONVEX_URL) {
 	throw new Error('Missing PUBLIC_CONVEX_URL.');
+}
+
+if (!env.PUBLIC_CLERK_PUBLISHABLE_KEY) {
+	throw new Error('Missing PUBLIC_CLERK_PUBLISHABLE_KEY.');
 }
 
 setupConvex(env.PUBLIC_CONVEX_URL);
@@ -23,5 +29,15 @@ setupConvex(env.PUBLIC_CONVEX_URL);
 	/>
 </svelte:head>
 
-<ClerkAuthMount />
-{@render children()}
+<ClerkProvider
+	publishableKey={env.PUBLIC_CLERK_PUBLISHABLE_KEY}
+	signInUrl={env.PUBLIC_CLERK_SIGN_IN_URL || '/sign-in'}
+	signUpUrl={env.PUBLIC_CLERK_SIGN_UP_URL || '/sign-up'}
+	signInForceRedirectUrl={env.PUBLIC_CLERK_AFTER_SIGN_IN_URL || '/dashboard'}
+	signInFallbackRedirectUrl={env.PUBLIC_CLERK_AFTER_SIGN_IN_URL || '/dashboard'}
+	signUpForceRedirectUrl={env.PUBLIC_CLERK_AFTER_SIGN_UP_URL || '/dashboard'}
+	signUpFallbackRedirectUrl={env.PUBLIC_CLERK_AFTER_SIGN_UP_URL || '/dashboard'}
+>
+	<ClerkConvexBridge />
+	{@render children()}
+</ClerkProvider>
