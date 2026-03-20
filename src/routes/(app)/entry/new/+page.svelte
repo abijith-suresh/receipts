@@ -2,14 +2,61 @@
 import EntryForm from '$lib/components/EntryForm.svelte';
 </script>
 
-<section class="space-y-6">
-	<div class="rounded-[2rem] border border-white/70 bg-white/70 p-6 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-		<p class="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-strong)]">Capture the day</p>
-		<h2 class="mt-2 font-display text-3xl text-[var(--color-ink)]">Log today's work before it fades.</h2>
-		<p class="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)] sm:text-base">
-			Drop in the rough version now. We'll add the AI structure loop in the next phase.
+<div class="page">
+	<div class="page-header">
+		<p class="eyebrow">Capture the day</p>
+		<h1 class="page-title">Log today's work before it fades.</h1>
+		<p class="page-desc">
+			Drop in the rough version now — no special format needed.
 		</p>
 	</div>
 
 	<EntryForm />
-</section>
+</div>
+
+<style>
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.page-header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding-bottom: 1.5rem;
+	border-bottom: 1px solid var(--color-border);
+}
+
+.eyebrow {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: var(--color-brand-strong);
+	margin: 0;
+}
+
+.page-title {
+	font-family: var(--font-display);
+	font-size: 2rem;
+	font-weight: 400;
+	color: var(--color-ink);
+	margin: 0;
+	line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+	.page-title {
+		font-size: 2.25rem;
+	}
+}
+
+.page-desc {
+	font-size: 0.9375rem;
+	line-height: 1.7;
+	color: var(--color-muted);
+	margin: 0;
+}
+</style>

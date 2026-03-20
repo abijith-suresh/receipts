@@ -1,15 +1,67 @@
-<section class="rounded-[2rem] border border-white/60 bg-white/80 p-8 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur">
-	<p class="text-sm font-semibold uppercase tracking-[0.28em] text-[var(--color-brand-strong)]">
-		Start your receipts habit
-	</p>
-	<h2 class="mt-3 font-display text-3xl text-[var(--color-ink)]">Nothing logged yet.</h2>
-	<p class="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-muted)] sm:text-base">
+<section class="empty">
+	<p class="empty-eyebrow">Start your receipts habit</p>
+	<h2 class="empty-title">Nothing logged yet.</h2>
+	<p class="empty-desc">
 		Write the kind of update you wish you could remember three months from now: shipped work,
 		bugs fixed, hard conversations, blockers, and momentum.
 	</p>
-	<div class="mt-6">
-		<a class="inline-flex items-center rounded-full bg-[var(--color-ink)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-strong)]" href="/entry/new">
-			Log today
-		</a>
-	</div>
+	<a class="empty-cta" href="/entry/new">Log today</a>
 </section>
+
+<style>
+.empty {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 2.5rem 2rem;
+	border-radius: 1rem;
+	border: 1px dashed var(--color-border);
+	background-color: var(--color-surface);
+}
+
+.empty-eyebrow {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: var(--color-brand-strong);
+	margin: 0;
+}
+
+.empty-title {
+	font-family: var(--font-display);
+	font-size: 1.875rem;
+	font-weight: 400;
+	color: var(--color-ink);
+	margin: 0;
+	line-height: 1.25;
+}
+
+.empty-desc {
+	font-size: 0.9375rem;
+	line-height: 1.75;
+	color: var(--color-muted);
+	margin: 0;
+	max-width: 38rem;
+}
+
+.empty-cta {
+	display: inline-flex;
+	align-items: center;
+	margin-top: 0.5rem;
+	padding: 0.625rem 1.25rem;
+	border-radius: 9999px;
+	background-color: var(--color-ink);
+	color: #fff;
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.15s ease, background-color 0.15s ease;
+	align-self: flex-start;
+}
+
+.empty-cta:hover {
+	transform: translateY(-1px);
+	background-color: var(--color-brand-strong);
+}
+</style>

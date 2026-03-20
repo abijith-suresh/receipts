@@ -15,29 +15,149 @@ const entries = useQuery(
 );
 </script>
 
-<section class="space-y-6">
-	<div class="flex flex-col gap-4 rounded-[2rem] border border-white/70 bg-white/70 p-6 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.4)] backdrop-blur sm:flex-row sm:items-end sm:justify-between">
-		<div>
-			<p class="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-strong)]">Daily proof of work</p>
-			<h2 class="mt-2 font-display text-3xl text-[var(--color-ink)]">Your timeline</h2>
-			<p class="mt-3 max-w-2xl text-sm leading-7 text-[var(--color-muted)] sm:text-base">
+<div class="page">
+	<div class="page-header">
+		<div class="page-header-text">
+			<p class="eyebrow">Daily proof of work</p>
+			<h1 class="page-title">Your timeline</h1>
+			<p class="page-desc">
 				Log quickly, revisit before reviews, and build a body of evidence one calm workday at a time.
 			</p>
 		</div>
-		<a class="inline-flex items-center rounded-full bg-[var(--color-ink)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-[var(--color-brand-strong)]" href="/entry/new">
-			New entry
-		</a>
+		<a class="btn-primary" href="/entry/new">New entry</a>
 	</div>
 
 	{#if entries.isLoading}
-		<div class="rounded-[2rem] border border-white/70 bg-white/80 p-8 text-sm text-[var(--color-muted)] shadow-[0_24px_60px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-			Loading your timeline...
+		<div class="status-card">
+			<div class="loading-dot"></div>
+			<span>Loading your timeline…</span>
 		</div>
 	{:else if entries.error}
-		<div class="rounded-[2rem] border border-rose-200 bg-rose-50 p-8 text-sm text-rose-700 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.25)]">
+		<div class="error-card">
 			{entries.error.message}
 		</div>
 	{:else}
 		<EntryTimeline entries={entries.data ?? []} />
 	{/if}
-</section>
+</div>
+
+<style>
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+/* ── Page header ─────────────────────────────────────────── */
+.page-header {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	padding-bottom: 1.5rem;
+	border-bottom: 1px solid var(--color-border);
+}
+
+@media (min-width: 640px) {
+	.page-header {
+		flex-direction: row;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 1.5rem;
+	}
+}
+
+.page-header-text {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.eyebrow {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: var(--color-brand-strong);
+	margin: 0;
+}
+
+.page-title {
+	font-family: var(--font-display);
+	font-size: 2rem;
+	font-weight: 400;
+	color: var(--color-ink);
+	margin: 0;
+	line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+	.page-title {
+		font-size: 2.25rem;
+	}
+}
+
+.page-desc {
+	font-size: 0.9375rem;
+	line-height: 1.7;
+	color: var(--color-muted);
+	margin: 0;
+	max-width: 40rem;
+}
+
+/* ── Primary button ──────────────────────────────────────── */
+.btn-primary {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.625rem 1.25rem;
+	border-radius: 9999px;
+	background-color: var(--color-ink);
+	color: #fff;
+	font-size: 0.875rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.15s ease, background-color 0.15s ease;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.btn-primary:hover {
+	transform: translateY(-1px);
+	background-color: var(--color-brand-strong);
+}
+
+/* ── Status cards ────────────────────────────────────────── */
+.status-card {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 2rem;
+	border-radius: 1rem;
+	border: 1px solid var(--color-border);
+	background-color: var(--color-surface);
+	font-size: 0.875rem;
+	color: var(--color-muted);
+}
+
+.loading-dot {
+	width: 0.4375rem;
+	height: 0.4375rem;
+	border-radius: 9999px;
+	background-color: var(--color-brand);
+	flex-shrink: 0;
+	animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 0.3; transform: scale(0.9); }
+	50%       { opacity: 1;   transform: scale(1.1); }
+}
+
+.error-card {
+	padding: 1.25rem 1.5rem;
+	border-radius: 1rem;
+	border: 1px solid #fecaca;
+	background-color: #fef2f2;
+	font-size: 0.875rem;
+	color: #b91c1c;
+}
+</style>

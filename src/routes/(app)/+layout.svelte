@@ -31,12 +31,35 @@ const isBootstrapping = $derived(
 </script>
 
 {#if isBootstrapping}
-	<div class="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,rgba(196,215,255,0.8),transparent_40%),linear-gradient(180deg,#f8f4eb_0%,#f5efe4_45%,#f4efe8_100%)] px-5 text-center text-sm text-[var(--color-muted)]">
-		Bootstrapping your private workspace...
+	<div class="boot-screen">
+		<span class="boot-dot"></span>
 	</div>
 {:else if isSignedIn}
 	<EnsureUserBootstrap />
-	<AppShell eyebrow="Private timeline" heading="Keep the evidence while it's still fresh.">
+	<AppShell>
 		{@render children()}
 	</AppShell>
 {/if}
+
+<style>
+.boot-screen {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	background-color: var(--color-canvas);
+}
+
+.boot-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 9999px;
+	background-color: var(--color-brand);
+	animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+	0%, 100% { opacity: 0.25; transform: scale(0.85); }
+	50%       { opacity: 1;    transform: scale(1.15); }
+}
+</style>

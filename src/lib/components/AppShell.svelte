@@ -1,9 +1,8 @@
 <script lang="ts">
+import { page } from '$app/stores';
 import { UserButton } from 'svelte-clerk';
 
-const { heading, eyebrow, children } = $props<{
-	heading: string;
-	eyebrow: string;
+const { children } = $props<{
 	children: () => unknown;
 }>();
 
@@ -15,36 +14,234 @@ const navItems = [
 ];
 </script>
 
-<div class="min-h-screen bg-[radial-gradient(circle_at_top,rgba(196,215,255,0.8),transparent_40%),linear-gradient(180deg,#f8f4eb_0%,#f5efe4_45%,#f4efe8_100%)] text-[var(--color-ink)]">
-	<div class="mx-auto max-w-6xl px-5 py-6 sm:px-8 lg:px-10">
-		<header class="rounded-[2rem] border border-white/70 bg-white/75 px-5 py-4 shadow-[0_24px_60px_-36px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
-			<div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-				<div>
-					<a class="inline-flex items-center gap-3 text-[0.7rem] font-semibold uppercase tracking-[0.34em] text-[var(--color-brand-strong)]" href="/dashboard">
-						<span class="inline-flex size-8 items-center justify-center rounded-full bg-[var(--color-ink)] text-white">r</span>
-						receipts.cv
-					</a>
-					<div class="mt-4">
-						<p class="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-strong)]">{eyebrow}</p>
-						<h1 class="mt-2 font-display text-3xl sm:text-4xl">{heading}</h1>
-					</div>
-				</div>
-
-				<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between lg:min-w-[22rem] lg:justify-end">
-					<nav class="flex flex-wrap gap-2">
-						{#each navItems as item}
-							<a class="rounded-full border border-[var(--color-border)] bg-white/80 px-4 py-2 text-sm font-medium text-[var(--color-muted)] transition hover:border-[var(--color-brand-strong)] hover:text-[var(--color-ink)]" href={item.href}>
-								{item.label}
-							</a>
-						{/each}
-					</nav>
-					<UserButton />
-				</div>
-			</div>
-		</header>
-
-		<main class="py-8">
-			{@render children()}
-		</main>
+<!-- Mobile top bar (visible below lg) -->
+<header class="mobile-bar">
+	<a class="logo" href="/dashboard">
+		<span class="logo-mark">r</span>
+		<span class="logo-text">receipts.cv</span>
+	</a>
+	<nav class="mobile-nav">
+		{#each navItems as item}
+			<a
+				class="mobile-nav-link"
+				class:active={$page.url.pathname === item.href ||
+					($page.url.pathname.startsWith(item.href) && item.href !== '/dashboard')}
+				href={item.href}
+			>
+				{item.label}
+			</a>
+		{/each}
+	</nav>
+	<div class="mobile-user">
+		<UserButton />
 	</div>
+</header>
+
+<!-- Desktop: sidebar + main content -->
+<div class="shell">
+	<aside class="sidebar">
+		<div class="sidebar-top">
+			<a class="logo" href="/dashboard">
+				<span class="logo-mark">r</span>
+				<span class="logo-text">receipts.cv</span>
+			</a>
+
+			<nav class="sidebar-nav">
+				{#each navItems as item}
+					<a
+						class="sidebar-nav-link"
+						class:active={$page.url.pathname === item.href ||
+							($page.url.pathname.startsWith(item.href) && item.href !== '/dashboard')}
+						href={item.href}
+					>
+						{item.label}
+					</a>
+				{/each}
+			</nav>
+		</div>
+
+		<div class="sidebar-bottom">
+			<UserButton />
+		</div>
+	</aside>
+
+	<main class="content">
+		{@render children()}
+	</main>
 </div>
+
+<style>
+/* ── Shell ───────────────────────────────────────────────── */
+.shell {
+	display: flex;
+	min-height: 100vh;
+	background-color: var(--color-canvas);
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.sidebar {
+	display: none;
+}
+
+@media (min-width: 1024px) {
+	.sidebar {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		width: 14rem;
+		flex-shrink: 0;
+		min-height: 100vh;
+		padding: 2rem 1.25rem;
+		border-right: 1px solid var(--color-border);
+		background-color: var(--color-surface);
+		position: sticky;
+		top: 0;
+		height: 100vh;
+		overflow-y: auto;
+	}
+}
+
+.sidebar-top {
+	display: flex;
+	flex-direction: column;
+	gap: 2.5rem;
+}
+
+.sidebar-bottom {
+	padding-bottom: 0.25rem;
+}
+
+/* ── Logo ────────────────────────────────────────────────── */
+.logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.625rem;
+	text-decoration: none;
+}
+
+.logo-mark {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.875rem;
+	height: 1.875rem;
+	border-radius: 9999px;
+	background-color: var(--color-ink);
+	color: #fff;
+	font-size: 0.8125rem;
+	font-weight: 700;
+	flex-shrink: 0;
+}
+
+.logo-text {
+	font-size: 0.6875rem;
+	font-weight: 700;
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+	color: var(--color-brand-strong);
+}
+
+/* ── Sidebar nav ─────────────────────────────────────────── */
+.sidebar-nav {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+}
+
+.sidebar-nav-link {
+	display: block;
+	padding: 0.5625rem 0.75rem;
+	border-radius: 0.5rem;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--color-muted);
+	text-decoration: none;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.sidebar-nav-link:hover {
+	background-color: var(--color-canvas);
+	color: var(--color-ink);
+}
+
+.sidebar-nav-link.active {
+	background-color: var(--color-brand-soft);
+	color: var(--color-brand-strong);
+	font-weight: 600;
+}
+
+/* ── Content area ────────────────────────────────────────── */
+.content {
+	flex: 1;
+	min-width: 0;
+	padding: 2rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+	.content {
+		padding: 2.5rem 2rem;
+	}
+}
+
+@media (min-width: 1024px) {
+	.content {
+		padding: 2.5rem 3rem;
+		max-width: 52rem;
+	}
+}
+
+/* ── Mobile top bar ──────────────────────────────────────── */
+.mobile-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.75rem 1.25rem;
+	background-color: var(--color-surface);
+	border-bottom: 1px solid var(--color-border);
+	position: sticky;
+	top: 0;
+	z-index: 40;
+}
+
+@media (min-width: 1024px) {
+	.mobile-bar {
+		display: none;
+	}
+}
+
+.mobile-nav {
+	display: flex;
+	align-items: center;
+	gap: 0.125rem;
+	flex-wrap: wrap;
+}
+
+.mobile-nav-link {
+	padding: 0.375rem 0.625rem;
+	border-radius: 9999px;
+	font-size: 0.8125rem;
+	font-weight: 500;
+	color: var(--color-muted);
+	text-decoration: none;
+	transition:
+		background-color 0.15s ease,
+		color 0.15s ease;
+}
+
+.mobile-nav-link:hover {
+	color: var(--color-ink);
+}
+
+.mobile-nav-link.active {
+	background-color: var(--color-brand-soft);
+	color: var(--color-brand-strong);
+	font-weight: 600;
+}
+
+.mobile-user {
+	flex-shrink: 0;
+}
+</style>
