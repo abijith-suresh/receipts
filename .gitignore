@@ -21,6 +21,13 @@ Thumbs.db
 
 # Convex
 .convex/
+src/convex/_generated/ai/ai-files.state.json
+
+# Local AI tooling
+.agents/
+.claude/
+CLAUDE.md
+skills-lock.json
 
 # Vite
 vite.config.js.timestamp-*
