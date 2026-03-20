@@ -1,7 +1,8 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
 	"files": {
-		"ignoreUnknown": true
+		"ignoreUnknown": true,
+		"includes": ["**", "!**/*.svelte", "!.svelte-kit", "!build", "!.vercel"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -13,12 +14,14 @@
 			"recommended": true
 		}
 	},
-	"organizeImports": {
-		"enabled": true
-	},
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "single"
+		}
+	},
+	"css": {
+		"linter": {
+			"enabled": false
 		}
 	}
 }
