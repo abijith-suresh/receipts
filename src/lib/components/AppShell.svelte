@@ -10,8 +10,6 @@
 	const navItems = [
 		{ href: '/dashboard', label: 'Today' },
 		{ href: '/history', label: 'History' },
-		{ href: '/generate', label: 'Generate' },
-		{ href: '/settings', label: 'Settings' },
 	];
 
 	function isActive(href: string) {
@@ -22,22 +20,13 @@
 <div class="shell">
 	<aside class="sidebar">
 		<div class="sidebar-top">
-			<div class="brand-block">
-				<a class="logo" href="/dashboard">
-					<span class="logo-mark">r</span>
-					<span class="logo-copy">
-						<span class="logo-text">receipts.cv</span>
-						<span class="logo-subtitle">Private proof of work</span>
-					</span>
-				</a>
-
-				<div class="sidebar-intro">
-					<p class="sidebar-kicker">Your workspace</p>
-					<p class="sidebar-note">
-						Capture the rough version while it is still sharp, then return later when you need the receipts.
-					</p>
-				</div>
-			</div>
+			<a class="logo" href="/dashboard">
+				<span class="logo-mark">r</span>
+				<span class="logo-copy">
+					<span class="logo-text">receipts.cv</span>
+					<span class="logo-subtitle">Private proof of work</span>
+				</span>
+			</a>
 
 			<nav class="sidebar-nav">
 				{#each navItems as item}
@@ -112,12 +101,6 @@
 	gap: 2.25rem;
 }
 
-.brand-block {
-	display: flex;
-	flex-direction: column;
-	gap: 1.25rem;
-}
-
 .logo {
 	display: inline-flex;
 	align-items: center;
@@ -155,35 +138,6 @@
 
 .logo-subtitle {
 	font-size: 0.82rem;
-	color: var(--color-muted);
-}
-
-.sidebar-intro {
-	display: flex;
-	flex-direction: column;
-	gap: 0.45rem;
-	padding: 1rem 1.05rem;
-	border-radius: 1.1rem;
-	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-canvas) 88%, white 12%);
-}
-
-.sidebar-kicker,
-.sidebar-note {
-	margin: 0;
-}
-
-.sidebar-kicker {
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.18em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
-
-.sidebar-note {
-	font-size: 0.88rem;
-	line-height: 1.7;
 	color: var(--color-muted);
 }
 

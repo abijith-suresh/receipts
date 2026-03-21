@@ -109,6 +109,9 @@
 
 	{#if menuOpen}
 		<div class:down={menuDirection === 'down'} class="menu-panel" role="menu">
+			<a class="menu-link" href="/reports" onclick={closeMenu} role="menuitem">
+				Reports
+			</a>
 			<a class="menu-link" href="/settings" onclick={closeMenu} role="menuitem">
 				Settings
 			</a>
