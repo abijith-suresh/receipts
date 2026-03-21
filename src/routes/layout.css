@@ -6,7 +6,7 @@
 */
 @theme {
 	/* Typography */
-	--font-display: "Instrument Serif", Georgia, serif;
+	--font-display: "Satoshi", system-ui, sans-serif;
 	--font-body: "Satoshi", system-ui, sans-serif;
 
 	/* Eyebrow / label system */
@@ -128,14 +128,12 @@
 }
 
 /* View Transitions API — subtle crossfade on page navigation */
-@keyframes vt-slide-in {
+@keyframes vt-fade-in {
 	from {
 		opacity: 0;
-		transform: translateY(6px);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
 	}
 }
 
@@ -149,11 +147,24 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-	::view-transition-old(root) {
+	/* Suppress full-page root transition */
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
+	}
+
+	/* Sidebar: completely static, never animates */
+	::view-transition-old(sidebar),
+	::view-transition-new(sidebar) {
+		animation: none;
+	}
+
+	/* Only the main content area fades */
+	::view-transition-old(main-content) {
 		animation: 120ms ease-out both vt-fade-out;
 	}
-	::view-transition-new(root) {
-		animation: 200ms ease-out both vt-slide-in;
+	::view-transition-new(main-content) {
+		animation: 180ms ease-out both vt-fade-in;
 	}
 }
 

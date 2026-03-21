@@ -178,10 +178,6 @@
 
 <section class="auth-page">
 	<div class="auth-shell">
-		<header class="auth-header">
-			<a href="/" class="auth-wordmark">receipts.cv</a>
-		</header>
-
 		<div class="auth-content">
 			<div class="auth-card">
 				{#if step === 'initial'}
@@ -316,24 +312,6 @@
 		.auth-shell {
 			padding-block: 2.5rem;
 		}
-	}
-
-	.auth-header {
-		display: flex;
-		justify-content: center;
-	}
-
-	.auth-wordmark {
-		font-family: var(--font-display);
-		font-size: 1.375rem;
-		color: var(--color-ink);
-		text-decoration: none;
-		letter-spacing: -0.01em;
-		transition: color 0.15s ease;
-	}
-
-	.auth-wordmark:hover {
-		color: var(--color-brand);
 	}
 
 	.auth-content {

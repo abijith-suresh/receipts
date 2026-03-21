@@ -5,6 +5,7 @@
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
 	import SettingField from '$lib/components/settings/SettingField.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { api } from '$lib/convex';
 	import {
 		getBrowserTimeZone,
@@ -127,9 +128,9 @@
 				<p class="profile-name">{displayName}</p>
 				<p class="profile-email">{emailAddress}</p>
 			</div>
-			<button class="button-secondary" onclick={handleSignOut}>
+			<Button variant="secondary" onclick={handleSignOut}>
 				Sign out
-			</button>
+			</Button>
 		</div>
 	</section>
 
@@ -156,13 +157,9 @@
 								<option value={option}>{option}</option>
 							{/each}
 						</select>
-						<button 
-							type="button" 
-							class="button-text" 
-							onclick={useDetectedTimezone}
-						>
+						<Button variant="text" onclick={useDetectedTimezone}>
 							Use detected
-						</button>
+						</Button>
 					</div>
 				</SettingField>
 
@@ -200,13 +197,9 @@
 							<span class="status-pending">Unsaved changes</span>
 						{/if}
 					</div>
-					<button 
-						type="submit" 
-						class="button-primary"
-						disabled={!isDirty || isSaving}
-					>
+					<Button type="submit" disabled={!isDirty || isSaving}>
 						{isSaving ? 'Saving…' : 'Save preferences'}
-					</button>
+					</Button>
 				</div>
 			</form>
 		{/if}
@@ -371,64 +364,6 @@
 		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 12%, transparent);
 	}
 
-	.button-primary,
-	.button-secondary {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.75rem 1.375rem;
-		border-radius: 9999px;
-		font-size: 0.875rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: transform 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
-		line-height: 1.4;
-		min-height: 2.75rem;
-	}
-
-	.button-primary {
-		border: none;
-		background: var(--color-ink);
-		color: #fff;
-	}
-
-	.button-primary:hover:not(:disabled) {
-		background: var(--color-brand-strong);
-		transform: translateY(-1px);
-	}
-
-	.button-primary:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.button-secondary {
-		border: 1px solid var(--color-border);
-		background: var(--color-surface);
-		color: var(--color-ink);
-	}
-
-	.button-secondary:hover {
-		border-color: var(--color-brand);
-		color: var(--color-brand-strong);
-	}
-
-	.button-text {
-		background: none;
-		border: none;
-		padding: 0;
-		font-size: 0.8125rem;
-		font-weight: 500;
-		color: var(--color-brand);
-		cursor: pointer;
-		text-decoration: underline;
-		text-underline-offset: 0.15em;
-	}
-
-	.button-text:hover {
-		color: var(--color-brand-strong);
-	}
-
 	.form-footer {
 		display: flex;
 		align-items: center;
@@ -529,10 +464,6 @@
 		.form-footer {
 			flex-direction: column;
 			align-items: stretch;
-		}
-
-		.button-primary {
-			width: 100%;
 		}
 	}
 </style>

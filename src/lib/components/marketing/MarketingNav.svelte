@@ -51,16 +51,16 @@
 
 		<!-- Desktop CTAs -->
 		<div class="hidden items-center gap-1 md:flex">
-			<a
-				href="/sign-in"
-				class="rounded-full px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
-			>
-				Sign in
-			</a>
-			<a
-				href="/sign-up"
-				class="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
-			>
+		<a
+			href="/login"
+			class="rounded-full px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+		>
+			Sign in
+		</a>
+		<a
+			href="/login"
+			class="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
+		>
 				Get started
 			</a>
 		</div>
@@ -68,7 +68,7 @@
 		<!-- Mobile: get started + hamburger -->
 		<div class="flex items-center gap-2 md:hidden">
 			<a
-				href="/sign-up"
+				href="/login"
 				class="rounded-full bg-brand px-3.5 py-1.5 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
 			>
 				Get started
@@ -112,10 +112,10 @@
 					</a>
 				{/each}
 				<div class="mt-2 border-t border-border pt-2">
-					<a
-						href="/sign-in"
-						onclick={closeMobile}
-						class="block rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:text-ink"
+				<a
+					href="/login"
+					onclick={closeMobile}
+					class="block rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:text-ink"
 					>
 						Sign in
 					</a>

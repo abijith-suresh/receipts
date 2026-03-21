@@ -46,12 +46,12 @@
 				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Account</p>
 				<ul class="mt-4 space-y-3">
 					<li>
-						<a href="/sign-in" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
-							Sign in
-						</a>
-					</li>
-					<li>
-						<a href="/sign-up" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
+				<a href="/login" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
+						Sign in
+					</a>
+				</li>
+				<li>
+					<a href="/login" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
 							Get started free
 						</a>
 					</li>

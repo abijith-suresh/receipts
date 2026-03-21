@@ -2,8 +2,7 @@
 	import { useQuery } from 'convex-svelte';
 	import { useClerkContext } from 'svelte-clerk';
 	import type { LogEntry } from '$lib/convex';
-	import { fade, fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { fade } from 'svelte/transition';
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
 	import TodayCaptureForm from '$lib/components/TodayCaptureForm.svelte';
@@ -47,7 +46,7 @@
 	</header>
 
 	{#if !todayEntry.isLoading}
-		<div class="capture-card" in:fly={{ y: 10, duration: 280, easing: cubicOut }}>
+		<div class="capture-card" in:fade={{ duration: 200 }}>
 			<div class="card-header">
 				<h2 class="card-title">What moved forward today?</h2>
 				<p class="card-subtitle">Write it the way you would say it. Keep the facts while they are still fresh.</p>

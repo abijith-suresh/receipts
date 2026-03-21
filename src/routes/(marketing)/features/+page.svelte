@@ -7,23 +7,7 @@
 </svelte:head>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
-
-	onMount(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						entry.target.classList.add('revealed');
-						observer.unobserve(entry.target);
-					}
-				});
-			},
-			{ threshold: 0.1, rootMargin: '0px 0px -20px 0px' }
-		);
-		document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
-		return () => observer.disconnect();
-	});
+	import { reveal } from '$lib/actions/reveal.js';
 </script>
 
 <!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
@@ -31,6 +15,7 @@
 	<!-- Eyebrow pill -->
 	<p
 		data-reveal
+		use:reveal
 		class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-[0.6875rem] font-medium tracking-[0.12em] text-muted"
 	>
 		<span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
@@ -40,6 +25,7 @@
 	<!-- H1 -->
 	<h1
 		data-reveal
+		use:reveal
 		class="mx-auto mt-7 max-w-4xl font-display text-4xl text-ink sm:text-5xl lg:text-6xl"
 		style="letter-spacing: -0.02em; line-height: 1.1; transition-delay: 0.1s"
 	>
@@ -49,6 +35,7 @@
 	<!-- Subtext -->
 	<p
 		data-reveal
+		use:reveal
 		class="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted"
 		style="transition-delay: 0.2s"
 	>
@@ -58,11 +45,12 @@
 	<!-- CTAs -->
 	<div
 		data-reveal
+		use:reveal
 		class="mt-9 flex flex-wrap items-center justify-center gap-3"
 		style="transition-delay: 0.3s"
 	>
 		<a
-			href="/sign-up"
+			href="/login"
 			class="rounded-xl bg-brand px-7 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/85 hover:shadow-md active:translate-y-0"
 		>
 			Start for free
@@ -81,6 +69,7 @@
 	<div class="mx-auto max-w-6xl px-6 py-20">
 		<div
 			data-reveal
+			use:reveal
 			class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20"
 		>
 			<!-- Text: left -->
@@ -169,6 +158,7 @@
 	<div class="mx-auto max-w-6xl px-6 py-20">
 		<div
 			data-reveal
+			use:reveal
 			class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20"
 		>
 			<!-- Visual: left on desktop -->
@@ -250,6 +240,7 @@
 	<div class="mx-auto max-w-6xl px-6 py-20">
 		<div
 			data-reveal
+			use:reveal
 			class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20"
 		>
 			<!-- Text: left -->
@@ -315,6 +306,7 @@
 	<div class="mx-auto max-w-6xl px-6 py-20">
 		<div
 			data-reveal
+			use:reveal
 			class="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20"
 		>
 			<!-- Visual: left on desktop -->
@@ -406,6 +398,7 @@
 <div class="px-6 py-16">
 	<div
 		data-reveal
+		use:reveal
 		class="cta-panel mx-auto max-w-4xl rounded-3xl border border-brand-muted/70 bg-brand-soft py-20 text-center"
 	>
 		<h2
@@ -418,7 +411,7 @@
 			Free forever for the core habit.
 		</p>
 		<a
-			href="/sign-up"
+			href="/login"
 			class="mt-9 inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand/85 hover:shadow-md"
 		>
 			Create your free account

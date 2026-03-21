@@ -30,13 +30,12 @@
 <div class="shell">
 	<aside class="sidebar">
 		<div class="sidebar-top">
-			<a class="logo" href="/dashboard">
-				<span class="logo-mark">r</span>
-				<span class="logo-copy">
-					<span class="logo-text">receipts</span>
-					<span class="logo-subtitle">Prove your worth.</span>
-				</span>
-			</a>
+		<a class="logo" href="/dashboard">
+			<span class="logo-copy">
+				<span class="logo-text">receipts</span>
+				<span class="logo-subtitle">Prove your worth.</span>
+			</span>
+		</a>
 
 		<nav class="sidebar-nav">
 			<a class:selected={isActive(navItems[0].href, navItems[0].view)} class="sidebar-nav-link" href={navItems[0].href}>
@@ -58,12 +57,11 @@
 
 	<main class="content">
 		<div class="mobile-shell-top">
-			<a class="logo mobile-logo" href="/dashboard">
-				<span class="logo-mark">r</span>
-				<span class="logo-copy">
-					<span class="logo-text">receipts</span>
-				</span>
-			</a>
+		<a class="logo mobile-logo" href="/dashboard">
+			<span class="logo-copy">
+				<span class="logo-text">receipts</span>
+			</span>
+		</a>
 			<AccountMenu compact menuDirection="down" />
 		</div>
 
@@ -94,6 +92,7 @@
 
 .sidebar {
 	display: none;
+	view-transition-name: sidebar;
 }
 
 @media (min-width: 1024px) {
@@ -122,24 +121,7 @@
 .logo {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.85rem;
 	text-decoration: none;
-}
-
-.logo-mark {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 2.1rem;
-	height: 2.1rem;
-	border-radius: 9999px;
-	background-color: var(--color-ink);
-	color: var(--color-surface);
-	font-size: 1rem;
-	font-family: var(--font-display);
-	font-style: italic;
-	font-weight: 400;
-	flex-shrink: 0;
 }
 
 .logo-copy {
@@ -214,6 +196,7 @@
 	min-width: 0;
 	padding: 1.35rem 1rem 2rem;
 	background: var(--color-canvas);
+	view-transition-name: main-content;
 }
 
 .content-inner {

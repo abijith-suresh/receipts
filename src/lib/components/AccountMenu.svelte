@@ -3,8 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
 	import { useClerkContext } from 'svelte-clerk';
-	import { fly, fade } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { fade } from 'svelte/transition';
 	let { compact = false, menuDirection = 'up' }: { compact?: boolean; menuDirection?: 'up' | 'down' } = $props();
 
 	const clerk = useClerkContext();
@@ -118,7 +117,7 @@
 			class:down={menuDirection === 'down'}
 			class="menu-panel"
 			role="menu"
-			in:fly={{ y: menuDirection === 'down' ? -6 : 6, duration: 180, easing: cubicOut }}
+			in:fade={{ duration: 160 }}
 			out:fade={{ duration: 100 }}
 		>
 			<a class="menu-link" href="/reports" onclick={closeMenu} role="menuitem">

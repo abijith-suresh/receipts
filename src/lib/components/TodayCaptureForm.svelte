@@ -4,6 +4,7 @@
 
 	import { api, type LogEntry } from '$lib/convex';
 	import { validateEntry } from '$lib/utils/entries';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	const convex = useConvexClient();
 
@@ -100,9 +101,9 @@
 
 	<div class="form-footer">
 		<span class="char-count">{rawInput.trim().length} chars</span>
-		<button class="btn-submit" type="submit" disabled={isSaving}>
+		<Button type="submit" disabled={isSaving}>
 			{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
-		</button>
+		</Button>
 	</div>
 </form>
 
@@ -241,30 +242,5 @@
 .char-count {
 	font-size: 0.75rem;
 	color: var(--color-muted);
-}
-
-.btn-submit {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.625rem 1.25rem;
-	border-radius: 9999px;
-	border: none;
-	background: var(--color-ink);
-	color: #fff;
-	font-size: 0.875rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-	transform: translateY(-1px);
-	background: var(--color-brand-strong);
-}
-
-.btn-submit:disabled {
-	opacity: 0.55;
-	cursor: not-allowed;
 }
 </style>
