@@ -2,13 +2,12 @@
 	import { useQuery } from 'convex-svelte';
 	import { goto } from '$app/navigation';
 	import { useClerkContext } from 'svelte-clerk';
-    import type { LogEntry } from '$lib/convex';
+	import type { LogEntry } from '$lib/convex';
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
-	import EntryCard from '$lib/components/EntryCard.svelte';
 	import TodayCaptureForm from '$lib/components/TodayCaptureForm.svelte';
 	import { api } from '$lib/convex';
-	import { formatEntryDate, formatRelativeEntryDate, getTodayLocalDate } from '$lib/utils/date';
+	import { formatDateTime, formatEntryDate, formatRelativeEntryDate, getTodayLocalDate } from '$lib/utils/date';
 
 	const clerk = useClerkContext();
 	let activeDate = $state(getTodayLocalDate());
@@ -22,8 +21,11 @@
 	);
 	const recentEntries = useQuery(
 		api.logEntries.listRecent,
-		() => (ready ? { limit: 6 } : 'skip'),
+		() => (ready ? { limit: 4 } : 'skip'),
 	);
+
+	const currentEntry = $derived((todayEntry.data as LogEntry | null | undefined) ?? null);
+	const currentRecentEntries = $derived((recentEntries.data as LogEntry[] | undefined) ?? []);
 
 	function handleSaved(entryDate: string) {
 		activeDate = entryDate;
@@ -39,93 +41,77 @@
 	function openHistory(date: string) {
 		void goto(`/history?view=week&date=${date}`);
 	}
-
-	const currentEntry = $derived((todayEntry.data as LogEntry | null | undefined) ?? null);
-	const currentRecentEntries = $derived((recentEntries.data as LogEntry[] | undefined) ?? []);
 </script>
 
 <div class="today-page">
-	<div class="hero">
-		<div class="hero-copy">
+	<div class="utility-row">
+		<div class="utility-copy">
 			<p class="eyebrow">Today</p>
-			<h1 class="title">Capture what moved forward before the details disappear.</h1>
-			<p class="desc">
-				This is your private work log, not a dashboard full of widgets. Save the rough version now and return later when you need the proof.
-			</p>
+			<h1>{formatRelativeEntryDate(activeDate)}</h1>
+			<p>{formatEntryDate(activeDate)}</p>
 		</div>
 
-		<div class="hero-rail">
-			<div class="date-card">
-				<p class="date-label">Active day</p>
-				<p class="date-value">{formatRelativeEntryDate(activeDate)}</p>
-				<p class="date-meta">{formatEntryDate(activeDate)}</p>
-			</div>
-
-			<div class="date-card muted">
-				<p class="date-label">Future-ready</p>
-				<p class="date-value small">Text today, voice later</p>
-				<p class="date-meta">This composer is designed so voice input can land here without changing the flow.</p>
-			</div>
+		<div class="utility-actions">
+			<span class="privacy-pill">Private</span>
+			<a href="/history?view=week&date={activeDate}">Open history</a>
 		</div>
 	</div>
 
-	{#if savedToast}
-		<div class="toast">Receipt saved for {formatRelativeEntryDate(activeDate)}.</div>
-	{/if}
+	<section class="capture-block">
+		<div class="capture-copy">
+			<h2>What moved forward today?</h2>
+			<p>Write it the way you would say it. Keep the facts while they are still fresh.</p>
+		</div>
 
-	<div class="workspace-grid">
-		<section class="composer-panel">
-			<TodayCaptureForm entryDate={activeDate} entry={todayEntry.data} onSaved={handleSaved} />
-		</section>
+		<TodayCaptureForm entryDate={activeDate} entry={currentEntry} onSaved={handleSaved} />
 
-		<section class="context-panel">
-			<div class="panel-card">
-				<p class="panel-label">For this day</p>
-				{#if todayEntry.isLoading}
-					<p class="panel-copy">Loading your receipt…</p>
-				{:else if todayEntry.error}
-					<p class="panel-copy error">{todayEntry.error.message}</p>
-				{:else if currentEntry}
-					<EntryCard entry={currentEntry} variant="today" />
-				{:else}
-					<div class="empty-card">
-						<p class="empty-title">No receipt saved for this day yet.</p>
-						<p class="panel-copy">Start with the rough version now. You can refine and browse it from History later.</p>
-					</div>
-				{/if}
+		<div class="status-row">
+			{#if todayEntry.isLoading}
+				<span>Loading this day…</span>
+			{:else if todayEntry.error}
+				<span class="error">{todayEntry.error.message}</span>
+			{:else if savedToast && currentEntry}
+				<span>Saved {formatDateTime(currentEntry.updatedAt)}</span>
+			{:else if currentEntry}
+				<span>Last updated {formatDateTime(currentEntry.updatedAt)}</span>
+			{:else}
+				<span>Your receipt stays private.</span>
+			{/if}
+		</div>
+
+		{#if currentEntry}
+			<div class="saved-snapshot">
+				<p class="snapshot-label">Saved receipt</p>
+				<p class="snapshot-summary">{currentEntry.summary}</p>
+				<p class="snapshot-body">{currentEntry.rawInput}</p>
 			</div>
+		{/if}
+	</section>
 
-			<div class="panel-card">
-				<div class="panel-header-row">
-					<div>
-						<p class="panel-label">Recent receipts</p>
-						<p class="panel-copy">A small view back, not the whole archive.</p>
-					</div>
-					<a class="panel-link" href="/history?view=week&date={activeDate}">Open history</a>
-				</div>
-
-				{#if recentEntries.isLoading}
-					<p class="panel-copy">Loading recent days…</p>
-				{:else if recentEntries.error}
-					<p class="panel-copy error">{recentEntries.error.message}</p>
-				{:else}
-					<div class="recent-list">
-						{#each currentRecentEntries as entry (entry._id)}
-							<div class:selected={entry.entryDate === activeDate} class="recent-item">
-								<button type="button" class="recent-item-main" onclick={() => (activeDate = entry.entryDate)}>
-									<div>
-										<p class="recent-item-date">{formatRelativeEntryDate(entry.entryDate)}</p>
-										<p class="recent-item-summary">{entry.summary}</p>
-									</div>
-								</button>
-								<button type="button" class="recent-item-link" onclick={() => openHistory(entry.entryDate)}>Week view</button>
-							</div>
-						{/each}
-					</div>
-				{/if}
+	<section class="recent-block">
+		<div class="recent-header">
+			<div>
+				<p class="recent-label">Recent</p>
+				<p class="recent-copy">A short way back into your past few receipts.</p>
 			</div>
-		</section>
-	</div>
+			<a href="/history?view=week&date={activeDate}">Browse all</a>
+		</div>
+
+		{#if recentEntries.isLoading}
+			<p class="recent-copy">Loading recent receipts…</p>
+		{:else if recentEntries.error}
+			<p class="recent-copy error">{recentEntries.error.message}</p>
+		{:else}
+			<div class="recent-list">
+				{#each currentRecentEntries as entry (entry._id)}
+					<button type="button" class:selected={entry.entryDate === activeDate} class="recent-item" onclick={() => openHistory(entry.entryDate)}>
+						<span class="recent-item-date">{formatRelativeEntryDate(entry.entryDate)}</span>
+						<span class="recent-item-summary">{entry.summary}</span>
+					</button>
+				{/each}
+			</div>
+		{/if}
+	</section>
 </div>
 
 <style>
@@ -133,165 +119,166 @@
 	display: flex;
 	flex-direction: column;
 	gap: 1.5rem;
+	max-width: 52rem;
 }
 
-.hero {
-	display: grid;
-	grid-template-columns: minmax(0, 1.4fr) minmax(17rem, 0.85fr);
+.utility-row,
+.capture-block,
+.recent-block {
+	border-radius: 1.4rem;
+	border: 1px solid var(--color-border);
+	background: color-mix(in srgb, var(--color-surface) 94%, white 6%);
+}
+
+.utility-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
 	gap: 1rem;
-	align-items: end;
-	padding-bottom: 1.5rem;
-	border-bottom: 1px solid var(--color-border);
+	padding: 1rem 1.15rem;
+	flex-wrap: wrap;
 }
 
-.eyebrow {
-	margin: 0 0 0.45rem;
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
-
-.title {
-	margin: 0;
-	max-width: 50rem;
-	font-family: var(--font-display);
-	font-size: clamp(2.2rem, 4vw, 3.7rem);
-	font-weight: 400;
-	line-height: 1.03;
-	letter-spacing: -0.03em;
-	color: var(--color-ink);
-}
-
-.desc,
-.panel-copy,
-.date-meta,
+.utility-copy p,
+.utility-copy h1,
+.capture-copy h2,
+.capture-copy p,
+.status-row,
+.snapshot-label,
+.snapshot-summary,
+.snapshot-body,
+.recent-label,
+.recent-copy,
+.recent-item-date,
 .recent-item-summary {
 	margin: 0;
-	color: var(--color-muted);
-	line-height: 1.75;
 }
 
-.desc {
-	margin-top: 0.9rem;
-	max-width: 44rem;
-	font-size: 0.98rem;
-}
-
-.hero-rail,
-.context-panel {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-
-.date-card,
-.panel-card,
-.toast {
-	padding: 1.1rem 1.15rem;
-	border-radius: 1.2rem;
-	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 92%, white 8%);
-}
-
-.date-card.muted {
-	background: color-mix(in srgb, var(--color-canvas) 90%, white 10%);
-}
-
-.date-label,
-.panel-label,
-.recent-item-date {
-	margin: 0;
-	font-size: 0.72rem;
+.eyebrow,
+.snapshot-label,
+.recent-label {
+	font-size: 0.7rem;
 	font-weight: 700;
-	letter-spacing: 0.16em;
+	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	color: var(--color-brand-strong);
 }
 
-.date-value {
-	margin: 0.35rem 0 0.2rem;
+.utility-copy h1,
+.capture-copy h2 {
 	font-family: var(--font-display);
-	font-size: 1.9rem;
 	font-weight: 400;
-	line-height: 1.05;
 	color: var(--color-ink);
+	line-height: 1.06;
 }
 
-.date-value.small {
-	font-size: 1.25rem;
-	line-height: 1.2;
+.utility-copy h1 {
+	font-size: 1.9rem;
+	margin-top: 0.2rem;
 }
 
-.toast {
-	padding: 0.85rem 1rem;
-	font-size: 0.9rem;
-	color: var(--color-brand-strong);
-	background: color-mix(in srgb, var(--color-brand-soft) 65%, white 35%);
+.utility-copy p:last-child,
+.capture-copy p,
+.status-row,
+.snapshot-body,
+.recent-copy {
+	color: var(--color-muted);
+	line-height: 1.7;
 }
 
-.workspace-grid {
-	display: grid;
-	grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.95fr);
-	gap: 1rem;
-	align-items: start;
-}
-
-.composer-panel {
-	min-width: 0;
-}
-
-.panel-card {
+.utility-actions {
 	display: flex;
-	flex-direction: column;
-	gap: 0.85rem;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
 }
 
-.panel-header-row {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-between;
-	gap: 1rem;
-}
-
-.panel-link,
-.recent-item-link {
-	font-size: 0.82rem;
+.utility-actions a,
+.recent-header a {
+	font-size: 0.84rem;
 	font-weight: 600;
 	color: var(--color-ink);
 	text-decoration: none;
-	border: none;
-	background: transparent;
-	cursor: pointer;
 }
 
-.panel-link:hover,
-.recent-item-link:hover {
+.utility-actions a:hover,
+.recent-header a:hover {
 	color: var(--color-brand-strong);
 }
 
-.empty-card {
+.privacy-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.4rem 0.72rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--color-brand-soft) 68%, white 32%);
+	font-size: 0.78rem;
+	font-weight: 700;
+	color: var(--color-brand-strong);
+}
+
+.capture-block,
+.recent-block {
+	padding: 1.2rem;
+}
+
+.capture-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	margin-bottom: 1rem;
+}
+
+.capture-copy h2 {
+	font-size: 2.2rem;
+	letter-spacing: -0.02em;
+}
+
+.status-row {
+	padding: 0.85rem 0.1rem 0;
+	font-size: 0.84rem;
+}
+
+.saved-snapshot {
 	display: flex;
 	flex-direction: column;
 	gap: 0.45rem;
-	padding: 1rem;
-	border-radius: 1rem;
-	background: var(--color-canvas);
-	border: 1px dashed var(--color-border);
+	padding-top: 1rem;
+	margin-top: 1rem;
+	border-top: 1px solid var(--color-border);
 }
 
-.empty-title {
-	margin: 0;
-	font-size: 1rem;
+.snapshot-summary {
+	font-size: 1.08rem;
 	font-weight: 600;
 	color: var(--color-ink);
+	line-height: 1.45;
+}
+
+.snapshot-body {
+	font-size: 0.95rem;
+	line-height: 1.75;
+	max-width: 44rem;
+	display: -webkit-box;
+	line-clamp: 3;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.recent-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+	margin-bottom: 1rem;
+	flex-wrap: wrap;
 }
 
 .recent-list {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	gap: 0.6rem;
 }
 
 .recent-item {
@@ -299,11 +286,12 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	padding: 0.85rem 0.95rem;
+	padding: 0.9rem 0.95rem;
 	border-radius: 1rem;
 	border: 1px solid var(--color-border);
 	background: var(--color-canvas);
 	text-align: left;
+	cursor: pointer;
 	transition:
 		border-color 0.15s ease,
 		transform 0.15s ease,
@@ -317,19 +305,17 @@
 	background: color-mix(in srgb, var(--color-brand-soft) 60%, white 40%);
 }
 
-.recent-item-main {
-	flex: 1;
-	display: block;
-	border: none;
-	background: transparent;
-	padding: 0;
-	text-align: left;
-	cursor: pointer;
+.recent-item-date {
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--color-brand-strong);
 }
 
 .recent-item-summary {
-	margin-top: 0.25rem;
-	font-size: 0.9rem;
+	font-size: 0.92rem;
+	font-weight: 500;
 	color: var(--color-ink);
 	line-height: 1.55;
 }
@@ -338,10 +324,14 @@
 	color: #b91c1c;
 }
 
-@media (max-width: 1100px) {
-	.hero,
-	.workspace-grid {
-		grid-template-columns: 1fr;
+@media (max-width: 720px) {
+	.capture-copy h2 {
+		font-size: 1.8rem;
 	}
+
+	.recent-item {
+		flex-direction: column;
+		align-items: flex-start;
 	}
+}
 </style>

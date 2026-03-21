@@ -45,10 +45,7 @@
 
 			onSaved?.(entryDate);
 		} catch (error) {
-			errorMessage =
-				error instanceof Error
-					? error.message
-					: 'Unable to save your entry right now.';
+			errorMessage = error instanceof Error ? error.message : 'Unable to save your receipt right now.';
 		} finally {
 			isSaving = false;
 		}
@@ -56,11 +53,11 @@
 </script>
 
 <form class="capture-form" onsubmit={handleSubmit}>
-	<div class="capture-top">
-		<button type="button" class="date-chip" onclick={() => (showDateField = !showDateField)}>
+	<div class="capture-header">
+		<button type="button" class="date-link" onclick={() => (showDateField = !showDateField)}>
 			{showDateField ? 'Hide date' : 'Change date'}
 		</button>
-		<p class="capture-state">{entry ? 'Editing your saved receipt' : 'No receipt saved yet'}</p>
+		<span class="capture-state">{entry ? 'Saved draft loaded' : 'Not saved yet'}</span>
 	</div>
 
 	{#if showDateField}
@@ -70,32 +67,26 @@
 		</div>
 	{/if}
 
-	<label class="field-label" for="raw-input">What moved forward today?</label>
+	<label class="sr-only" for="raw-input">What moved forward today?</label>
 	<textarea
 		id="raw-input"
 		class="field-textarea"
-		placeholder="Shipped the billing retry fix, reviewed two PRs, and finally unblocked the analytics migration. Still waiting on product sign-off for the dashboard copy."
+		placeholder="Write it the way you would say it. Shipments, meetings, blockers, wins, loose notes — it all counts."
 		bind:value={rawInput}
 	></textarea>
-
-	<div class="field-hint">
-		<span>Keep it natural. Voice notes can plug into this same flow later.</span>
-		<span class="char-count">{rawInput.trim().length} chars</span>
-	</div>
 
 	{#if errorMessage}
 		<p class="error-msg">{errorMessage}</p>
 	{/if}
 
 	<div class="form-footer">
-		<p class="footer-note">
-			{entry
-				? 'Update the rough version now. You can structure and refine it later.'
-				: 'Start rough. Save the facts while they are still fresh.'}
-		</p>
-		<button class="btn-submit" type="submit" disabled={isSaving}>
-			{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
-		</button>
+		<p class="footer-note">Start rough. Refine later.</p>
+		<div class="footer-actions">
+			<span class="char-count">{rawInput.trim().length} chars</span>
+			<button class="btn-submit" type="submit" disabled={isSaving}>
+				{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
+			</button>
+		</div>
 	</div>
 </form>
 
@@ -103,15 +94,15 @@
 .capture-form {
 	display: flex;
 	flex-direction: column;
-	gap: 1.25rem;
-	padding: 1.6rem;
-	border-radius: 1.4rem;
+	gap: 1rem;
+	padding: 1.5rem;
+	border-radius: 1.5rem;
 	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 92%, white 8%);
-	box-shadow: 0 28px 60px -42px rgba(15, 23, 42, 0.24);
+	background: color-mix(in srgb, var(--color-surface) 94%, white 6%);
+	box-shadow: 0 32px 70px -48px rgba(15, 23, 42, 0.2);
 }
 
-.capture-top {
+.capture-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -119,41 +110,36 @@
 	flex-wrap: wrap;
 }
 
-.date-chip {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.45rem 0.8rem;
-	border-radius: 9999px;
-	border: 1px solid var(--color-border);
-	background: var(--color-canvas);
-	font-size: 0.78rem;
+.date-link {
+	border: none;
+	padding: 0;
+	background: transparent;
+	font-size: 0.82rem;
 	font-weight: 600;
 	color: var(--color-ink);
 	cursor: pointer;
-	transition:
-		border-color 0.15s ease,
-		color 0.15s ease;
 }
 
-.date-chip:hover {
-	border-color: color-mix(in srgb, var(--color-brand) 35%, var(--color-border));
+.date-link:hover {
 	color: var(--color-brand-strong);
 }
 
-.capture-state {
-	margin: 0;
-	font-size: 0.8125rem;
+.capture-state,
+.footer-note,
+.char-count {
+	font-size: 0.82rem;
 	color: var(--color-muted);
 }
 
 .date-field {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 0.45rem;
 	max-width: 12rem;
 }
 
-.field-label {
+.field-label,
+.sr-only {
 	font-size: 0.6875rem;
 	font-weight: 700;
 	letter-spacing: 0.18em;
@@ -161,35 +147,48 @@
 	color: var(--color-brand-strong);
 }
 
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
 .field-input,
 .field-textarea {
 	width: 100%;
+	box-sizing: border-box;
 	padding: 0.8rem 0.95rem;
-	border-radius: 0.9rem;
+	border-radius: 1rem;
 	border: 1px solid var(--color-border);
 	background: var(--color-canvas);
 	color: var(--color-ink);
-	font-size: 0.95rem;
+	font-size: 0.98rem;
 	outline: none;
 	transition:
 		border-color 0.15s ease,
 		box-shadow 0.15s ease;
-	box-sizing: border-box;
 }
 
 .field-input:focus,
 .field-textarea:focus {
 	border-color: var(--color-brand);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 15%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 14%, transparent);
 }
 
 .field-textarea {
-	min-height: 15rem;
+	min-height: 20rem;
 	resize: vertical;
-	line-height: 1.8;
-	font-size: 1rem;
-	padding-top: 1rem;
-	padding-bottom: 1rem;
+	padding-top: 1.2rem;
+	padding-bottom: 1.2rem;
+	font-size: 1.05rem;
+	line-height: 1.9;
+	border-radius: 1.25rem;
 }
 
 .field-textarea::placeholder {
@@ -197,28 +196,14 @@
 	opacity: 0.72;
 }
 
-.field-hint {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-	font-size: 0.8125rem;
-	color: var(--color-muted);
-	flex-wrap: wrap;
-}
-
-.char-count {
-	font-variant-numeric: tabular-nums;
-}
-
 .error-msg {
-	padding: 0.75rem 1rem;
-	border-radius: 0.875rem;
+	margin: 0;
+	padding: 0.8rem 0.95rem;
+	border-radius: 0.95rem;
 	border: 1px solid #fecaca;
-	background-color: #fef2f2;
+	background: #fef2f2;
 	font-size: 0.875rem;
 	color: #b91c1c;
-	margin: 0;
 }
 
 .form-footer {
@@ -226,27 +211,24 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	padding-top: 0.2rem;
-	border-top: 1px solid var(--color-border);
 	flex-wrap: wrap;
 }
 
-.footer-note {
-	margin: 0;
-	max-width: 28rem;
-	font-size: 0.875rem;
-	line-height: 1.6;
-	color: var(--color-muted);
+.footer-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.85rem;
+	flex-wrap: wrap;
 }
 
 .btn-submit {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0.75rem 1.3rem;
+	padding: 0.78rem 1.35rem;
 	border-radius: 9999px;
 	border: none;
-	background-color: var(--color-ink);
+	background: var(--color-ink);
 	color: #fff;
 	font-size: 0.875rem;
 	font-weight: 600;
@@ -256,7 +238,7 @@
 
 .btn-submit:hover:not(:disabled) {
 	transform: translateY(-1px);
-	background-color: var(--color-brand-strong);
+	background: var(--color-brand-strong);
 }
 
 .btn-submit:disabled {
