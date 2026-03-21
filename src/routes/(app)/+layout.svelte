@@ -21,7 +21,7 @@ $effect(() => {
 		return;
 	}
 
-	void goto('/sign-in');
+	void goto('/login');
 });
 
 const isSignedIn = $derived(!!clerk.auth.userId);

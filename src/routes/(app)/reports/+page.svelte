@@ -60,9 +60,9 @@
 .eyebrow,
 .card-label {
 	margin: 0;
-	font-size: 0.72rem;
+	font-size: var(--font-size-eyebrow);
 	font-weight: 700;
-	letter-spacing: 0.18em;
+	letter-spacing: var(--letter-spacing-eyebrow);
 	text-transform: uppercase;
 	color: var(--color-brand-strong);
 }
@@ -77,14 +77,14 @@
 }
 
 .page-title {
-	font-size: 2.4rem;
+	font-size: 2rem;
 	max-width: 44rem;
 }
 
 .page-desc,
 .reports-list {
 	margin: 0;
-	font-size: 0.95rem;
+	font-size: 0.9375rem;
 	line-height: 1.75;
 	color: var(--color-muted);
 	max-width: 44rem;
@@ -115,7 +115,7 @@
 }
 
 .card-title {
-	font-size: 1.5rem;
+	font-size: 1.25rem;
 }
 
 .reports-list {
@@ -132,7 +132,7 @@
 }
 
 .reports-actions a {
-	font-size: 0.85rem;
+	font-size: 0.875rem;
 	font-weight: 600;
 	text-decoration: none;
 	color: var(--color-ink);

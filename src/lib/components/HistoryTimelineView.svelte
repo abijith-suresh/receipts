@@ -160,9 +160,9 @@
 
 .entry-date {
 	display: inline-block;
-	font-size: 0.7rem;
+	font-size: var(--font-size-eyebrow);
 	font-weight: 700;
-	letter-spacing: 0.08em;
+	letter-spacing: var(--letter-spacing-eyebrow);
 	text-transform: uppercase;
 	color: var(--color-surface);
 	background: var(--color-brand);

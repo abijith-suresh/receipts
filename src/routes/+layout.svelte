@@ -5,8 +5,19 @@ import favicon from '$lib/assets/favicon.svg';
 import { resolveClerkPaths } from '$lib/auth/clerkPaths';
 import './layout.css';
 import { ClerkProvider } from 'svelte-clerk';
+import { onNavigate } from '$app/navigation';
 
 import ClerkConvexBridge from '$lib/components/ClerkConvexBridge.svelte';
+
+onNavigate((navigation) => {
+	if (!document.startViewTransition) return;
+	return new Promise((resolve) => {
+		document.startViewTransition(async () => {
+			resolve();
+			await navigation.complete;
+		});
+	});
+});
 
 let { children } = $props();
 const clerkPaths = resolveClerkPaths(env);

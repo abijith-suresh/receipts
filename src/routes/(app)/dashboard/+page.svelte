@@ -2,6 +2,8 @@
 	import { useQuery } from 'convex-svelte';
 	import { useClerkContext } from 'svelte-clerk';
 	import type { LogEntry } from '$lib/convex';
+	import { fade, fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
 	import TodayCaptureForm from '$lib/components/TodayCaptureForm.svelte';
@@ -44,28 +46,41 @@
 		<p class="date-label">{formatEntryDate(resolvedActiveDate)}</p>
 	</header>
 
-	<div class="capture-card">
-		<div class="card-header">
-			<h2 class="card-title">What moved forward today?</h2>
-			<p class="card-subtitle">Write it the way you would say it. Keep the facts while they are still fresh.</p>
-		</div>
+	{#if !todayEntry.isLoading}
+		<div class="capture-card" in:fly={{ y: 10, duration: 280, easing: cubicOut }}>
+			<div class="card-header">
+				<h2 class="card-title">What moved forward today?</h2>
+				<p class="card-subtitle">Write it the way you would say it. Keep the facts while they are still fresh.</p>
+			</div>
 
-		<TodayCaptureForm entryDate={resolvedActiveDate} entry={currentEntry} onSaved={handleSaved} />
+			<TodayCaptureForm entryDate={resolvedActiveDate} entry={currentEntry} onSaved={handleSaved} />
 
-		<div class="status-bar">
-			{#if todayEntry.isLoading}
-				<span class="status-text">Loading this day…</span>
-			{:else if todayEntry.error}
-				<span class="status-text error">{todayEntry.error.message}</span>
-			{:else if savedToast && currentEntry}
-				<span class="status-text">Saved {formatDateTime(currentEntry.updatedAt)}</span>
-			{:else if currentEntry}
-				<span class="status-text">Last updated {formatDateTime(currentEntry.updatedAt)}</span>
-			{:else}
-				<span class="status-text">Your receipt stays private.</span>
-			{/if}
+			<div class="status-bar">
+				{#key `${todayEntry.isLoading}-${savedToast}-${!!currentEntry}`}
+					<span
+						class="status-text"
+						class:error={!!todayEntry.error}
+						in:fade={{ duration: 200 }}
+					>
+						{#if todayEntry.error}
+							{todayEntry.error.message}
+						{:else if savedToast && currentEntry}
+							Saved {formatDateTime(currentEntry.updatedAt)}
+						{:else if currentEntry}
+							Last updated {formatDateTime(currentEntry.updatedAt)}
+						{:else}
+							Your receipt stays private.
+						{/if}
+					</span>
+				{/key}
+			</div>
 		</div>
-	</div>
+	{:else}
+		<div class="capture-card capture-card--skeleton" aria-busy="true">
+			<div class="skeleton-line skeleton-line--wide"></div>
+			<div class="skeleton-line skeleton-line--narrow"></div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -166,4 +181,34 @@
 	.capture-card {
 		padding: 1.25rem;
 	}}
+
+.capture-card--skeleton {
+	min-height: 12rem;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 0.75rem;
+	padding: 1.75rem;
+}
+
+.skeleton-line {
+	height: 0.875rem;
+	border-radius: var(--radius-sm);
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-border) 70%, transparent),
+		color-mix(in srgb, var(--color-border) 40%, transparent),
+		color-mix(in srgb, var(--color-border) 70%, transparent)
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.skeleton-line--wide  { width: 75%; }
+.skeleton-line--narrow { width: 45%; }
+
+@keyframes shimmer {
+	0%   { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
+}
 </style>

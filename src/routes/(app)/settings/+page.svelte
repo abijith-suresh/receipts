@@ -257,9 +257,9 @@
 
 	.eyebrow {
 		display: block;
-		font-size: 0.7rem;
+		font-size: var(--font-size-eyebrow);
 		font-weight: 600;
-		letter-spacing: 0.14em;
+		letter-spacing: var(--letter-spacing-eyebrow);
 		text-transform: uppercase;
 		color: var(--color-brand);
 		margin-bottom: 0.5rem;
@@ -267,7 +267,7 @@
 
 	.page-title {
 		font-family: var(--font-display);
-		font-size: 2.25rem;
+		font-size: 2rem;
 		font-weight: 400;
 		color: var(--color-ink);
 		margin: 0;
@@ -288,7 +288,7 @@
 
 	.card-title {
 		font-family: var(--font-display);
-		font-size: 1.35rem;
+		font-size: 1.25rem;
 		font-weight: 400;
 		color: var(--color-ink);
 		margin: 0;
@@ -341,7 +341,7 @@
 	}
 
 	.profile-email {
-		font-size: 0.88rem;
+		font-size: 0.875rem;
 		color: var(--color-muted);
 		margin: 0;
 		line-height: 1.4;
@@ -361,7 +361,7 @@
 		border: 1px solid var(--color-border);
 		background: var(--color-canvas);
 		color: var(--color-ink);
-		font-size: 0.94rem;
+		font-size: 0.9375rem;
 		outline: none;
 		transition: border-color 0.15s ease, box-shadow 0.15s ease;
 	}
@@ -417,7 +417,7 @@
 		background: none;
 		border: none;
 		padding: 0;
-		font-size: 0.82rem;
+		font-size: 0.8125rem;
 		font-weight: 500;
 		color: var(--color-brand);
 		cursor: pointer;
@@ -441,7 +441,7 @@
 	}
 
 	.save-status {
-		font-size: 0.88rem;
+		font-size: 0.875rem;
 		min-height: 1.5rem;
 	}
 
@@ -461,7 +461,7 @@
 	.error-message {
 		padding: 1rem;
 		border-radius: 0.875rem;
-		font-size: 0.94rem;
+		font-size: 0.9375rem;
 		background: var(--color-canvas);
 		border: 1px solid var(--color-border);
 	}
@@ -477,7 +477,7 @@
 	}
 
 	.placeholder-text {
-		font-size: 0.94rem;
+		font-size: 0.9375rem;
 		color: var(--color-muted);
 		margin: 0;
 	}
@@ -494,7 +494,7 @@
 	}
 
 	.help-links a {
-		font-size: 0.94rem;
+		font-size: 0.9375rem;
 		color: var(--color-ink);
 		text-decoration: none;
 		font-weight: 500;

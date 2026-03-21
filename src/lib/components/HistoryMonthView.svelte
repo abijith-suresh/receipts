@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { LogEntry } from '$lib/convex';
 	import { formatEntryDateCompact, formatMonthLabel, formatRelativeEntryDate } from '$lib/utils/date';
+	import { fade } from 'svelte/transition';
 
 	let {
 		entryDate,
@@ -70,18 +71,22 @@
 		<div class="selected-header">
 			<span class="selected-date">{formatRelativeEntryDate(selectedDate, timezone)}</span>
 		</div>
-		
-		{#if selectedEntry}
-			<div class="selected-entry">
-				<p class="entry-summary">{selectedEntry.summary}</p>
-				<p class="entry-body">{selectedEntry.rawInput}</p>
+
+		{#key selectedDate}
+			<div in:fade={{ duration: 180 }}>
+				{#if selectedEntry}
+					<div class="selected-entry">
+						<p class="entry-summary">{selectedEntry.summary}</p>
+						<p class="entry-body">{selectedEntry.rawInput}</p>
+					</div>
+				{:else}
+					<div class="selected-empty">
+						<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
+						<a href="/dashboard" class="add-link">Add entry</a>
+					</div>
+				{/if}
 			</div>
-		{:else}
-			<div class="selected-empty">
-				<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
-				<a href="/dashboard" class="add-link">Add entry</a>
-			</div>
-		{/if}
+		{/key}
 	</div>
 </section>
 

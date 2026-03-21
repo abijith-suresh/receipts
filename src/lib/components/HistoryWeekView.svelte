@@ -5,6 +5,7 @@
 		formatWeekday,
 		getTodayLocalDate,
 	} from '$lib/utils/date';
+	import { fade } from 'svelte/transition';
 
 	import EntryCard from './EntryCard.svelte';
 
@@ -79,24 +80,26 @@
 	</div>
 
 	<!-- Selected Day Content -->
-	<div class="selected-content">
-		<header class="selected-header">
-			<h2 class="selected-title">Selected: {getSelectedDateDisplay(selectedDate)}</h2>
-		</header>
+	{#key selectedDate}
+		<div class="selected-content" in:fade={{ duration: 180 }}>
+			<header class="selected-header">
+				<h2 class="selected-title">Selected: {getSelectedDateDisplay(selectedDate)}</h2>
+			</header>
 
-		{#if selectedEntries.length}
-			<div class="entries-list">
-				{#each selectedEntries as entry (entry._id)}
-					<EntryCard {entry} variant="history" />
-				{/each}
-			</div>
-		{:else}
-			<div class="empty-state">
-				<p>No receipt saved for this day yet.</p>
-				<p class="empty-hint">Keep the date selected as an anchor for backfilling when you need the record later.</p>
-			</div>
-		{/if}
-	</div>
+			{#if selectedEntries.length}
+				<div class="entries-list">
+					{#each selectedEntries as entry (entry._id)}
+						<EntryCard {entry} variant="history" />
+					{/each}
+				</div>
+			{:else}
+				<div class="empty-state">
+					<p>No receipt saved for this day yet.</p>
+					<p class="empty-hint">Keep the date selected as an anchor for backfilling when you need the record later.</p>
+				</div>
+			{/if}
+		</div>
+	{/key}
 </section>
 
 <style>

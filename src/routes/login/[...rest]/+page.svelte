@@ -3,10 +3,10 @@
 </script>
 
 <svelte:head>
-	<title>Create account - receipts.cv</title>
+	<title>Sign in — receipts</title>
 	<meta
 		name="description"
-		content="Create a receipts.cv account and start building a private record of your work, wins, and impact."
+		content="Sign in or create an account to start building a private record of your work, wins, and impact."
 	/>
 </svelte:head>
 

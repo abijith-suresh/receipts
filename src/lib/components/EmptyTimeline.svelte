@@ -20,9 +20,9 @@
 }
 
 .empty-eyebrow {
-	font-size: 0.6875rem;
+	font-size: var(--font-size-eyebrow);
 	font-weight: 700;
-	letter-spacing: 0.2em;
+	letter-spacing: var(--letter-spacing-eyebrow);
 	text-transform: uppercase;
 	color: var(--color-brand-strong);
 	margin: 0;

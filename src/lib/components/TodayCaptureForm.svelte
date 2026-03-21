@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { useConvexClient } from 'convex-svelte';
+	import { slide } from 'svelte/transition';
 
 	import { api, type LogEntry } from '$lib/convex';
 	import { validateEntry } from '$lib/utils/entries';
@@ -75,9 +76,11 @@
 	</div>
 
 	{#if showDateField}
-		<div class="date-field">
-			<label class="field-label" for="entry-date">Entry date</label>
-			<input id="entry-date" class="field-input" type="date" bind:value={entryDate} />
+		<div transition:slide={{ duration: 220 }}>
+			<div class="date-field">
+				<label class="field-label" for="entry-date">Entry date</label>
+				<input id="entry-date" class="field-input" type="date" bind:value={entryDate} />
+			</div>
 		</div>
 	{/if}
 

@@ -10,4 +10,4 @@
 	/>
 </svelte:head>
 
-<AuthShowcase mode="sign-in" />
+<AuthShowcase />
