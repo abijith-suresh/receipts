@@ -7,12 +7,16 @@
 		gridDates,
 		entries,
 		selectedDate,
+		timezone,
+		weekdayLabels,
 		onSelectDate,
 	}: {
 		entryDate: string;
 		gridDates: Array<{ date: string; inMonth: boolean }>;
 		entries: LogEntry[];
 		selectedDate: string;
+		timezone?: string;
+		weekdayLabels: string[];
 		onSelectDate?: (date: string) => void;
 	} = $props();
 
@@ -20,52 +24,62 @@
 		new Map(entries.map((entry) => [entry.entryDate, entry])),
 	);
 	const selectedEntry = $derived(entriesByDate.get(selectedDate) ?? null);
+
+	const today = $derived(
+		timezone 
+			? new Date(new Date().toLocaleString('en-US', { timeZone: timezone })).toISOString().split('T')[0]
+			: new Date().toISOString().split('T')[0]
+	);
 </script>
 
 <section class="month-view">
-	<div class="calendar-panel">
-		<div class="month-heading">
-			<h3>{formatMonthLabel(entryDate)}</h3>
-			<p>See your logging rhythm without falling into an endless feed.</p>
-		</div>
+	<div class="month-header">
+		<h3>{formatMonthLabel(entryDate)}</h3>
+	</div>
 
-		<div class="weekday-row">
-			{#each ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as label}
-				<span>{label}</span>
-			{/each}
-		</div>
+	<div class="weekday-row">
+		{#each weekdayLabels as label}
+			<span>{label}</span>
+		{/each}
+	</div>
 
-		<div class="calendar-grid">
-			{#each gridDates as item}
-				<button
-					type="button"
-					class="calendar-day"
-					class:selected={item.date === selectedDate}
-					class:muted={!item.inMonth}
-					onclick={() => onSelectDate?.(item.date)}
-				>
-					<span class="calendar-day-number">{item.date.slice(-2).replace(/^0/, '')}</span>
-					{#if entriesByDate.has(item.date)}
-						<span class="calendar-day-indicator">Logged</span>
-					{/if}
-				</button>
-			{/each}
-		</div>
+	<div class="calendar-grid">
+		{#each gridDates as item}
+			{@const isToday = item.date === today}
+			{@const hasEntry = entriesByDate.has(item.date)}
+			{@const isSelected = item.date === selectedDate}
+			<button
+				type="button"
+				class="calendar-day"
+				class:selected={isSelected}
+				class:today={isToday}
+				class:muted={!item.inMonth}
+				onclick={() => onSelectDate?.(item.date)}
+				aria-label={hasEntry ? `${item.date} - Logged` : item.date}
+				aria-pressed={isSelected}
+			>
+				<span class="calendar-day-number">{item.date.slice(-2).replace(/^0/, '')}</span>
+				{#if hasEntry}
+					<span class="entry-indicator" aria-hidden="true"></span>
+				{/if}
+			</button>
+		{/each}
 	</div>
 
 	<div class="selected-panel">
-		<p class="selected-label">Selected day</p>
-		<h3>{formatRelativeEntryDate(selectedDate)}</h3>
-
+		<div class="selected-header">
+			<span class="selected-date">{formatRelativeEntryDate(selectedDate, timezone)}</span>
+		</div>
+		
 		{#if selectedEntry}
 			<div class="selected-entry">
-				<p class="selected-summary">{selectedEntry.summary}</p>
-				<p class="selected-body">{selectedEntry.rawInput}</p>
+				<p class="entry-summary">{selectedEntry.summary}</p>
+				<p class="entry-body">{selectedEntry.rawInput}</p>
 			</div>
 		{:else}
 			<div class="selected-empty">
-				<p>No receipt saved for {formatEntryDateCompact(selectedDate)}.</p>
-				<p>Use Today to backfill when you need it.</p>
+				<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
+				<a href="/today?date={selectedDate}" class="add-link">Add entry</a>
 			</div>
 		{/if}
 	</div>
@@ -73,135 +87,193 @@
 
 <style>
 .month-view {
-	display: grid;
-	grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+	padding: 1.25rem;
+	border-radius: 1rem;
+	border: 1px solid var(--color-border);
+	background: var(--color-surface);
+	display: flex;
+	flex-direction: column;
 	gap: 1rem;
 }
 
-.calendar-panel,
-.selected-panel {
-	padding: 1.2rem;
-	border-radius: 1.2rem;
-	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 92%, white 8%);
-}
-
-.month-heading h3,
-.selected-panel h3 {
+.month-header h3 {
 	margin: 0;
 	font-family: var(--font-display);
-	font-size: 1.65rem;
+	font-size: 1.25rem;
 	font-weight: 400;
 	color: var(--color-ink);
 }
 
-.month-heading p,
-.selected-label,
-.selected-empty p,
-.selected-body {
-	margin: 0;
-	color: var(--color-muted);
-	line-height: 1.65;
-}
-
-.month-heading {
-	display: flex;
-	flex-direction: column;
+.weekday-row {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
 	gap: 0.35rem;
-	margin-bottom: 1rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-muted);
 }
 
-.weekday-row,
+.weekday-row span {
+	text-align: center;
+	padding: 0.35rem 0;
+}
+
 .calendar-grid {
 	display: grid;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
-	gap: 0.5rem;
-}
-
-.weekday-row {
-	margin-bottom: 0.5rem;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.12em;
-	text-transform: uppercase;
-	color: var(--color-muted);
+	gap: 0.35rem;
 }
 
 .calendar-day {
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
-	align-items: flex-start;
-	min-height: 5.5rem;
-	padding: 0.7rem;
-	border-radius: 0.95rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-canvas);
+	align-items: center;
+	justify-content: center;
+	gap: 0.25rem;
+	min-height: 3.5rem;
+	padding: 0.4rem;
+	border-radius: 0.5rem;
+	border: 1px solid transparent;
+	background: transparent;
 	cursor: pointer;
 	transition:
-		border-color 0.15s ease,
-		transform 0.15s ease,
-		background-color 0.15s ease;
+		background-color 0.15s ease,
+		border-color 0.15s ease;
 }
 
-.calendar-day:hover,
+.calendar-day:hover {
+	background: var(--color-canvas);
+}
+
 .calendar-day.selected {
-	transform: translateY(-1px);
-	border-color: color-mix(in srgb, var(--color-brand) 38%, var(--color-border));
-	background: color-mix(in srgb, var(--color-brand-soft) 52%, white 48%);
+	background: var(--color-brand);
+	border-color: var(--color-brand);
+}
+
+.calendar-day.selected .calendar-day-number {
+	color: white;
+}
+
+.calendar-day.selected .entry-indicator {
+	background: rgba(255, 255, 255, 0.9);
+}
+
+.calendar-day.today {
+	border: 1px dashed var(--color-border);
+}
+
+.calendar-day.today:hover {
+	border-color: var(--color-muted);
 }
 
 .calendar-day.muted {
-	opacity: 0.55;
+	opacity: 0.4;
 }
 
 .calendar-day-number {
-	font-size: 0.92rem;
-	font-weight: 600;
+	font-size: 0.875rem;
+	font-weight: 500;
 	color: var(--color-ink);
+	line-height: 1.2;
 }
 
-.calendar-day-indicator {
-	font-size: 0.7rem;
-	font-weight: 600;
-	color: var(--color-brand-strong);
+.entry-indicator {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #14b8a6;
+	flex-shrink: 0;
 }
 
 .selected-panel {
+	padding-top: 1rem;
+	border-top: 1px solid var(--color-border);
 	display: flex;
 	flex-direction: column;
 	gap: 0.75rem;
 }
 
-.selected-label {
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.16em;
-	text-transform: uppercase;
+.selected-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
-.selected-summary {
-	margin: 0;
+.selected-date {
+	font-family: var(--font-display);
 	font-size: 1rem;
-	font-weight: 600;
 	color: var(--color-ink);
-	line-height: 1.5;
 }
 
-.selected-entry,
-.selected-empty {
+.selected-entry {
 	display: flex;
 	flex-direction: column;
-	gap: 0.65rem;
-	padding: 1rem;
-	border-radius: 1rem;
+	gap: 0.5rem;
+	padding: 0.875rem 1rem;
+	border-radius: 0.75rem;
 	background: var(--color-canvas);
 	border: 1px solid var(--color-border);
 }
 
-@media (max-width: 980px) {
-	.month-view {
-		grid-template-columns: 1fr;
-	}
+.entry-summary {
+	margin: 0;
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--color-ink);
+	line-height: 1.4;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	box-orient: vertical;
+	overflow: hidden;
+}
+
+.entry-body {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--color-muted);
+	line-height: 1.5;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	box-orient: vertical;
+	overflow: hidden;
+}
+
+.selected-empty {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.875rem 1rem;
+	border-radius: 0.75rem;
+	background: var(--color-canvas);
+	border: 1px solid var(--color-border);
+}
+
+.selected-empty p {
+	margin: 0;
+	font-size: 0.875rem;
+	color: var(--color-muted);
+}
+
+.add-link {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: var(--color-brand);
+	text-decoration: none;
+	padding: 0.35rem 0.75rem;
+	border-radius: 0.5rem;
+	background: var(--color-brand-soft);
+	transition: background-color 0.15s ease;
+}
+
+.add-link:hover {
+	background: var(--color-brand);
+	color: white;
 }
 </style>
