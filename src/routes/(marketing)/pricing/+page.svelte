@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Pricing — receipts.cv</title>
+	<title>Pricing — receipts</title>
 	<meta
 		name="description"
 		content="Simple, honest pricing. Free forever for the core habit. Upgrade to Pro for unlimited AI report generation."
@@ -47,7 +47,7 @@
 
 	<!-- Free card -->
 	<div class="rounded-2xl border border-border bg-surface p-8">
-		<p class="text-sm font-semibold uppercase tracking-widest text-muted">Free</p>
+		<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Free</p>
 		<div class="mt-4 flex items-end gap-1.5">
 			<span class="font-display text-5xl text-ink" style="line-height: 1">$0</span>
 			<span class="mb-1 text-lg text-muted">/month</span>
@@ -96,7 +96,7 @@
 			Most popular
 		</span>
 
-		<p class="text-sm font-semibold uppercase tracking-widest text-brand-strong">Pro</p>
+		<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">Pro</p>
 		<div class="mt-4 flex items-end gap-1.5">
 			<span class="font-display text-5xl text-ink" style="line-height: 1">$10</span>
 			<span class="mb-1 text-lg text-muted">/month</span>
@@ -144,9 +144,9 @@
 	<div class="overflow-hidden rounded-2xl border border-border">
 		<!-- Header row -->
 		<div class="grid grid-cols-3 bg-canvas px-6 py-3.5">
-			<span class="text-xs font-semibold uppercase tracking-widest text-muted">Feature</span>
-			<span class="text-center text-xs font-semibold uppercase tracking-widest text-muted">Free</span>
-			<span class="text-center text-xs font-semibold uppercase tracking-widest text-brand-strong">Pro</span>
+			<span class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Feature</span>
+			<span class="text-center text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Free</span>
+			<span class="text-center text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">Pro</span>
 		</div>
 
 		<!-- Rows -->

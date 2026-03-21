@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>Features — receipts.cv</title>
+	<title>Features — receipts</title>
 	<meta
 		name="description"
-		content="Everything receipts.cv does for your career record — plain-language logging, AI structuring, a personal timeline, and review-ready reports."
+		content="Everything receipts does for your career record — plain-language logging, AI structuring, a personal timeline, and review-ready reports."
 	/>
 </svelte:head>
 
@@ -31,7 +31,7 @@
 	<!-- Eyebrow pill -->
 	<p
 		data-reveal
-		class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-muted"
+		class="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-[0.6875rem] font-medium tracking-[0.12em] text-muted"
 	>
 		<span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
 		Built for individual contributors
@@ -85,7 +85,7 @@
 		>
 			<!-- Text: left -->
 			<div>
-				<p class="text-xs font-semibold uppercase tracking-widest text-brand-strong">
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">
 					01 — Capture
 				</p>
 				<h2
@@ -225,7 +225,7 @@
 
 			<!-- Text: right -->
 			<div>
-				<p class="text-xs font-semibold uppercase tracking-widest text-brand-strong">
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">
 					02 — Structure
 				</p>
 				<h2
@@ -254,7 +254,7 @@
 		>
 			<!-- Text: left -->
 			<div>
-				<p class="text-xs font-semibold uppercase tracking-widest text-brand-strong">
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">
 					03 — Remember
 				</p>
 				<h2
@@ -385,7 +385,7 @@
 
 			<!-- Text: right -->
 			<div>
-				<p class="text-xs font-semibold uppercase tracking-widest text-brand-strong">
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-brand-strong">
 					04 — Present
 				</p>
 				<h2
@@ -435,7 +435,7 @@
 		box-shadow:
 			0 4px 24px -6px rgba(13, 148, 136, 0.10),
 			0 1px 3px rgba(0, 0, 0, 0.05),
-			0 0 0 1px rgba(228, 228, 231, 0.8);
+			0 0 0 1px rgba(231, 226, 216, 0.8);
 	}
 
 	/* Subtle elevation for entry cards */

@@ -25,7 +25,7 @@
 
 	let timezone = $state(getBrowserTimeZone());
 	let weekStartsOn = $state<0 | 1 | 2 | 3 | 4 | 5 | 6>(1);
-	let defaultHistoryView = $state<'week' | 'month' | 'archive'>('week');
+	let defaultHistoryView = $state<'week' | 'month' | 'timeline'>('week');
 	let isSaving = $state(false);
 	let saveMessage = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);

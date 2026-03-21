@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>FAQ — receipts.cv</title>
+	<title>FAQ — receipts</title>
 	<meta
 		name="description"
-		content="Common questions about receipts.cv — how it works, your data, billing, and more."
+		content="Common questions about receipts — how it works, your data, billing, and more."
 	/>
 </svelte:head>
 
@@ -26,9 +26,9 @@
 	<p class="category-label">About the product</p>
 
 	<details>
-		<summary>What is receipts.cv?</summary>
+		<summary>What is receipts?</summary>
 		<div class="answer">
-			receipts.cv is a private daily work journal for professionals. You write what you worked on
+			receipts is a private daily work journal for professionals. You write what you worked on
 			in plain English — AI structures it into tasks, skills, and impact. Over time, your entries
 			build a searchable career record you can use in performance reviews, raise conversations,
 			and 1-on-1s.
@@ -40,7 +40,7 @@
 		<div class="answer">
 			Primarily individual contributors — engineers, designers, product managers, and anyone who
 			wants a concrete record of their work. If you've ever been asked "what have you been working
-			on?" and struggled to remember, receipts.cv is for you.
+			on?" and struggled to remember, receipts is for you.
 		</div>
 	</details>
 

@@ -102,7 +102,7 @@
 <style>
 	.history-container {
 		background: var(--color-surface);
-		border-radius: 1rem;
+		border-radius: var(--radius-card);
 		padding: 1.25rem;
 		display: flex;
 		flex-direction: column;
@@ -143,7 +143,7 @@
 		align-items: flex-start;
 		gap: 0.25rem;
 		padding: 0.875rem 1.125rem;
-		border-radius: 0.75rem;
+		border-radius: var(--radius-md);
 		border: 1px solid var(--color-border);
 		background: var(--color-canvas);
 		text-align: left;
@@ -165,7 +165,7 @@
 	.day-pill.selected .day-name,
 	.day-pill.selected .day-date,
 	.day-pill.selected .day-count {
-		color: white;
+		color: var(--color-surface);
 	}
 
 	.day-pill.today {
@@ -254,7 +254,7 @@
 	.empty-state {
 		padding: 1.5rem;
 		text-align: center;
-		border-radius: 0.75rem;
+		border-radius: var(--radius-md);
 		border: 1px dashed var(--color-border);
 		background: var(--color-canvas);
 	}

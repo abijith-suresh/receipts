@@ -2,7 +2,7 @@
 	<title>receipts.cv — Prove your worth. Show your receipts.</title>
 	<meta
 		name="description"
-		content="Log your day in plain language. receipts.cv turns your work notes into a structured career record — ready for 1-on-1s, performance reviews, and raise conversations."
+		content="Log your day in plain language. receipts turns your work notes into a structured career record — ready for 1-on-1s, performance reviews, and raise conversations."
 	/>
 </svelte:head>
 
@@ -32,7 +32,7 @@
 <section class="mx-auto max-w-6xl px-6 pb-28 pt-32 text-center">
 	<!-- Eyebrow -->
 	<p
-		class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-muted"
+		class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-[0.6875rem] font-medium tracking-[0.12em] text-muted"
 	>
 		<span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
 		Career documentation for individual contributors
@@ -198,13 +198,13 @@
 							Skills demonstrated
 						</p>
 						<div class="mt-2 flex flex-wrap gap-1.5">
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								leadership
 							</span>
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								collaboration
 							</span>
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								technical writing
 							</span>
 						</div>
@@ -397,7 +397,7 @@
 		box-shadow:
 			0 4px 24px -6px rgba(13, 148, 136, 0.12),
 			0 1px 3px rgba(0, 0, 0, 0.06),
-			0 0 0 1px rgba(228, 228, 231, 0.8);
+			0 0 0 1px rgba(231, 226, 216, 0.8);
 	}
 
 	/* Step numbers — large italic display numeral */

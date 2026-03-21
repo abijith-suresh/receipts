@@ -19,13 +19,13 @@ const weekStartsOnValidator = v.union(
 const defaultHistoryViewValidator = v.union(
 	v.literal('week'),
 	v.literal('month'),
-	v.literal('archive'),
+	v.literal('timeline'),
 );
 
 const DEFAULT_USER_SETTINGS = {
 	timezone: 'UTC',
 	weekStartsOn: 1 as 0 | 1 | 2 | 3 | 4 | 5 | 6,
-	defaultHistoryView: 'week' as 'week' | 'month' | 'archive',
+	defaultHistoryView: 'week' as 'week' | 'month' | 'timeline',
 };
 
 async function getUserByClerkId(ctx: QueryCtx | MutationCtx, clerkId: string) {

@@ -1,6 +1,6 @@
 import type { WeekStartsOn } from '$lib/utils/date';
 
-export type HistoryView = 'week' | 'month' | 'archive';
+export type HistoryView = 'week' | 'month' | 'timeline';
 
 export type HistoryPreferences = {
 	weekStartsOn: WeekStartsOn;
@@ -28,7 +28,7 @@ export function resolveHistoryView(
 	value: string | null | undefined,
 	fallback: HistoryView = DEFAULT_HISTORY_PREFERENCES.defaultHistoryView,
 ): HistoryView {
-	if (value === 'week' || value === 'month' || value === 'archive') {
+	if (value === 'week' || value === 'month' || value === 'timeline') {
 		return value;
 	}
 
@@ -43,7 +43,7 @@ export function getHistoryHref(
 		view: preferences.defaultHistoryView,
 	});
 
-	if (preferences.defaultHistoryView === 'archive') {
+	if (preferences.defaultHistoryView === 'timeline') {
 		search.set('month', date.slice(0, 7));
 	} else {
 		search.set('date', date);

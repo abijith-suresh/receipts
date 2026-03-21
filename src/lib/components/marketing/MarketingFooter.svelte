@@ -4,8 +4,10 @@
 		<div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
 			<!-- Brand column -->
 			<div class="lg:col-span-2">
-				<a href="/" class="inline-block">
-					<span class="font-display text-lg text-ink" style="letter-spacing: -0.01em">receipts.cv</span>
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Your work, documented</p>
+				<a href="/" class="mt-3 inline-flex items-center gap-2">
+					<span class="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-[0.6875rem] font-semibold text-surface">r</span>
+					<span class="font-display italic text-lg text-ink" style="letter-spacing: -0.01em">receipts</span>
 				</a>
 				<p class="mt-3 max-w-xs text-sm leading-relaxed text-muted">
 					Prove your worth. Show your receipts. The career documentation tool built for individual contributors.
@@ -14,7 +16,7 @@
 
 			<!-- Product column -->
 			<div>
-				<p class="text-[11px] font-semibold uppercase tracking-widest text-muted">Product</p>
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Product</p>
 				<ul class="mt-4 space-y-3">
 					<li>
 						<a href="/features" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
@@ -39,9 +41,9 @@
 				</ul>
 			</div>
 
-			<!-- Company column -->
+			<!-- Account column -->
 			<div>
-				<p class="text-[11px] font-semibold uppercase tracking-widest text-muted">Account</p>
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Account</p>
 				<ul class="mt-4 space-y-3">
 					<li>
 						<a href="/sign-in" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
@@ -59,7 +61,7 @@
 
 		<!-- Bottom bar -->
 		<div class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
-			<p class="text-xs text-muted">© 2025 receipts.cv. All rights reserved.</p>
+			<p class="text-xs text-muted">© 2026 receipts. All rights reserved.</p>
 			<p class="text-xs text-muted">
 				Built for ICs who do great work and want proof of it.
 			</p>

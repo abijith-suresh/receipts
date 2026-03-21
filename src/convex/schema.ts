@@ -20,7 +20,7 @@ export default defineSchema({
 			),
 		),
 		defaultHistoryView: v.optional(
-			v.union(v.literal('week'), v.literal('month'), v.literal('archive')),
+			v.union(v.literal('week'), v.literal('month'), v.literal('timeline')),
 		),
 		createdAt: v.number(),
 		updatedAt: v.number(),

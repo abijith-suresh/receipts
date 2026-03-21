@@ -7,13 +7,23 @@
 		children: () => unknown;
 	}>();
 
-	const navItems = [
-		{ href: '/dashboard', label: 'Today' },
-		{ href: '/history', label: 'History' },
+	type NavItem = { href: string; label: string; view: string | null };
+
+	const navItems: NavItem[] = [
+		{ href: '/dashboard', label: 'Today', view: null },
+		{ href: '/history?view=timeline', label: 'Timeline', view: 'timeline' },
+		{ href: '/history?view=week', label: 'Week', view: 'week' },
+		{ href: '/history?view=month', label: 'Month', view: 'month' },
 	];
 
-	function isActive(href: string) {
-		return $page.url.pathname === href || ($page.url.pathname.startsWith(href) && href !== '/dashboard');
+	function isActive(href: string, view: string | null): boolean {
+		if (view === null) {
+			return $page.url.pathname === '/dashboard';
+		}
+		return (
+			$page.url.pathname === '/history' &&
+			$page.url.searchParams.get('view') === view
+		);
 	}
 </script>
 
@@ -23,18 +33,22 @@
 			<a class="logo" href="/dashboard">
 				<span class="logo-mark">r</span>
 				<span class="logo-copy">
-					<span class="logo-text">receipts.cv</span>
-					<span class="logo-subtitle">Private proof of work</span>
+					<span class="logo-text">receipts</span>
+					<span class="logo-subtitle">Prove your worth.</span>
 				</span>
 			</a>
 
-			<nav class="sidebar-nav">
-				{#each navItems as item}
-					<a class:selected={isActive(item.href)} class="sidebar-nav-link" href={item.href}>
-						{item.label}
-					</a>
-				{/each}
-			</nav>
+		<nav class="sidebar-nav">
+			<a class:selected={isActive(navItems[0].href, navItems[0].view)} class="sidebar-nav-link" href={navItems[0].href}>
+				{navItems[0].label}
+			</a>
+			<hr class="sidebar-nav-divider" />
+			{#each navItems.slice(1) as item}
+				<a class:selected={isActive(item.href, item.view)} class="sidebar-nav-link" href={item.href}>
+					{item.label}
+				</a>
+			{/each}
+		</nav>
 		</div>
 
 		<div class="sidebar-bottom">
@@ -47,15 +61,19 @@
 			<a class="logo mobile-logo" href="/dashboard">
 				<span class="logo-mark">r</span>
 				<span class="logo-copy">
-					<span class="logo-text">receipts.cv</span>
+					<span class="logo-text">receipts</span>
 				</span>
 			</a>
 			<AccountMenu compact menuDirection="down" />
 		</div>
 
 		<nav class="mobile-nav">
-			{#each navItems as item}
-				<a class:selected={isActive(item.href)} class="mobile-nav-link" href={item.href}>
+			<a class:selected={isActive(navItems[0].href, navItems[0].view)} class="mobile-nav-link" href={navItems[0].href}>
+				{navItems[0].label}
+			</a>
+			<span class="mobile-nav-divider" aria-hidden="true"></span>
+			{#each navItems.slice(1) as item}
+				<a class:selected={isActive(item.href, item.view)} class="mobile-nav-link" href={item.href}>
 					{item.label}
 				</a>
 			{/each}
@@ -71,7 +89,7 @@
 .shell {
 	display: flex;
 	min-height: 100vh;
-	background: linear-gradient(180deg, color-mix(in srgb, var(--color-canvas) 96%, white 4%), var(--color-canvas));
+	background: var(--color-canvas);
 }
 
 .sidebar {
@@ -86,9 +104,9 @@
 		width: 18rem;
 		flex-shrink: 0;
 		min-height: 100vh;
-		padding: 2rem 1.35rem;
+		padding: 2.25rem 1.5rem;
 		border-right: 1px solid var(--color-border);
-		background: color-mix(in srgb, var(--color-surface) 95%, white 5%);
+		background: color-mix(in srgb, var(--color-canvas) 60%, var(--color-surface) 40%);
 		position: sticky;
 		top: 0;
 		height: 100vh;
@@ -98,13 +116,13 @@
 .sidebar-top {
 	display: flex;
 	flex-direction: column;
-	gap: 2.25rem;
+	gap: 2.5rem;
 }
 
 .logo {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.75rem;
+	gap: 0.85rem;
 	text-decoration: none;
 }
 
@@ -112,67 +130,82 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 2rem;
-	height: 2rem;
+	width: 2.1rem;
+	height: 2.1rem;
 	border-radius: 9999px;
 	background-color: var(--color-ink);
-	color: #fff;
-	font-size: 0.85rem;
-	font-weight: 700;
+	color: var(--color-surface);
+	font-size: 1rem;
+	font-family: var(--font-display);
+	font-style: italic;
+	font-weight: 400;
 	flex-shrink: 0;
 }
 
 .logo-copy {
 	display: flex;
 	flex-direction: column;
-	gap: 0.15rem;
+	gap: 0.1rem;
 }
 
 .logo-text {
-	font-size: 0.74rem;
-	font-weight: 700;
-	letter-spacing: 0.28em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
+	font-family: var(--font-display);
+	font-style: italic;
+	font-size: 1.2rem;
+	font-weight: 400;
+	color: var(--color-ink);
+	line-height: 1.2;
 }
 
 .logo-subtitle {
-	font-size: 0.82rem;
+	font-size: 0.75rem;
 	color: var(--color-muted);
+	letter-spacing: 0.01em;
 }
 
 .sidebar-nav {
 	display: flex;
 	flex-direction: column;
-	gap: 0.25rem;
+	gap: 0.15rem;
 }
 
 .sidebar-nav-link,
 .mobile-nav-link {
 	display: block;
-	padding: 0.7rem 0.85rem;
-	border-radius: 0.9rem;
-	font-size: 0.9rem;
+	padding: 0.65rem 0.9rem;
+	border-radius: var(--radius-md);
+	font-size: 0.875rem;
 	font-weight: 500;
-	color: var(--color-muted);
+	color: var(--color-ink-2);
 	text-decoration: none;
 	transition:
 		background-color 0.15s ease,
 		color 0.15s ease,
-		transform 0.15s ease;
+		border-color 0.15s ease;
+	border-left: 2px solid transparent;
 }
 
-.sidebar-nav-link:hover,
+.sidebar-nav-link:hover {
+	background: color-mix(in srgb, var(--color-border) 50%, transparent 50%);
+	color: var(--color-ink);
+	border-left-color: var(--color-border-strong);
+}
+
+.sidebar-nav-link.selected {
+	background: color-mix(in srgb, var(--color-brand-soft) 80%, transparent 20%);
+	color: var(--color-brand-strong);
+	border-left-color: var(--color-brand);
+	font-weight: 600;
+}
+
 .mobile-nav-link:hover,
-.sidebar-nav-link.selected,
 .mobile-nav-link.selected {
 	background: color-mix(in srgb, var(--color-brand-soft) 68%, white 32%);
 	color: var(--color-brand-strong);
-	transform: translateY(-1px);
 }
 
 .sidebar-bottom {
-	padding-top: 1rem;
+	padding-top: 1.25rem;
 	border-top: 1px solid var(--color-border);
 }
 
@@ -180,12 +213,27 @@
 	flex: 1;
 	min-width: 0;
 	padding: 1.35rem 1rem 2rem;
+	background: var(--color-canvas);
 }
 
 .content-inner {
 	max-width: 70rem;
 	margin: 0 auto;
 	padding-top: 1.2rem;
+}
+
+.sidebar-nav-divider {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 0.6rem 0.9rem;
+}
+
+.mobile-nav-divider {
+	width: 1px;
+	align-self: stretch;
+	background: var(--color-border);
+	border-radius: 1px;
+	margin: 0 0.1rem;
 }
 
 .mobile-shell-top {

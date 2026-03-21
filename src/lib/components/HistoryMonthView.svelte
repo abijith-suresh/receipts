@@ -79,7 +79,7 @@
 		{:else}
 			<div class="selected-empty">
 				<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
-				<a href="/today?date={selectedDate}" class="add-link">Add entry</a>
+				<a href="/dashboard" class="add-link">Add entry</a>
 			</div>
 		{/if}
 	</div>
@@ -88,7 +88,7 @@
 <style>
 .month-view {
 	padding: 1.25rem;
-	border-radius: 1rem;
+	border-radius: var(--radius-card);
 	border: 1px solid var(--color-border);
 	background: var(--color-surface);
 	display: flex;
@@ -134,7 +134,7 @@
 	gap: 0.25rem;
 	min-height: 3.5rem;
 	padding: 0.4rem;
-	border-radius: 0.5rem;
+	border-radius: var(--radius-sm);
 	border: 1px solid transparent;
 	background: transparent;
 	cursor: pointer;
@@ -153,7 +153,7 @@
 }
 
 .calendar-day.selected .calendar-day-number {
-	color: white;
+	color: var(--color-surface);
 }
 
 .calendar-day.selected .entry-indicator {
@@ -183,7 +183,7 @@
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background: #14b8a6;
+	background: var(--color-brand);
 	flex-shrink: 0;
 }
 
@@ -212,7 +212,7 @@
 	flex-direction: column;
 	gap: 0.5rem;
 	padding: 0.875rem 1rem;
-	border-radius: 0.75rem;
+	border-radius: var(--radius-md);
 	background: var(--color-canvas);
 	border: 1px solid var(--color-border);
 }
@@ -250,7 +250,7 @@
 	justify-content: space-between;
 	gap: 1rem;
 	padding: 0.875rem 1rem;
-	border-radius: 0.75rem;
+	border-radius: var(--radius-md);
 	background: var(--color-canvas);
 	border: 1px solid var(--color-border);
 }
@@ -267,13 +267,13 @@
 	color: var(--color-brand);
 	text-decoration: none;
 	padding: 0.35rem 0.75rem;
-	border-radius: 0.5rem;
+	border-radius: var(--radius-sm);
 	background: var(--color-brand-soft);
 	transition: background-color 0.15s ease;
 }
 
 .add-link:hover {
 	background: var(--color-brand);
-	color: white;
+	color: var(--color-surface);
 }
 </style>

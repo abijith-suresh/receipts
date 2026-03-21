@@ -59,9 +59,9 @@ export const historyViewOptions: Array<{
 		description: 'See your logging rhythm at a glance.',
 	},
 	{
-		value: 'archive',
-		label: 'Archive',
-		description: 'Jump into month buckets first.',
+		value: 'timeline',
+		label: 'Timeline',
+		description: 'Browse all entries as a chronological log.',
 	},
 ];
 
