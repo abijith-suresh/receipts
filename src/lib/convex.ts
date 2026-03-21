@@ -1,5 +1,8 @@
 import { makeFunctionReference } from 'convex/server';
 
+import type { HistoryView } from '$lib/history/preferences';
+import type { WeekStartsOn } from '$lib/utils/date';
+
 export const api = {
 	users: {
 		ensureCurrentUser: makeFunctionReference<
@@ -17,10 +20,35 @@ export const api = {
 				email?: string;
 				name?: string;
 				imageUrl?: string;
+				timezone?: string;
+				weekStartsOn?: WeekStartsOn;
+				defaultHistoryView?: HistoryView;
 				createdAt: number;
 				updatedAt: number;
 			} | null
 		>('users:current'),
+		settings: makeFunctionReference<
+			'query',
+			Record<string, never>,
+			{
+				timezone: string;
+				weekStartsOn: WeekStartsOn;
+				defaultHistoryView: HistoryView;
+			}
+		>('users:settings'),
+		updateSettings: makeFunctionReference<
+			'mutation',
+			{
+				timezone: string;
+				weekStartsOn: WeekStartsOn;
+				defaultHistoryView: HistoryView;
+			},
+			{
+				timezone: string;
+				weekStartsOn: WeekStartsOn;
+				defaultHistoryView: HistoryView;
+			}
+		>('users:updateSettings'),
 	},
 	logEntries: {
 		list: makeFunctionReference<
@@ -108,8 +136,12 @@ export type UserRecord = {
 	email?: string;
 	name?: string;
 	imageUrl?: string;
+	timezone?: string;
+	weekStartsOn?: WeekStartsOn;
+	defaultHistoryView?: HistoryView;
 	createdAt: number;
 	updatedAt: number;
 };
 
 export type LogEntry = (typeof api.logEntries.list)['_returnType'][number];
+export type UserSettings = (typeof api.users.settings)['_returnType'];
