@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { useClerkContext } from 'svelte-clerk';
@@ -109,7 +110,9 @@
 
 		try {
 			markSignOutRedirectPending();
-			await clerk.clerk.signOut({ redirectUrl: signOutRedirectUrl });
+			await clerk.clerk.signOut();
+			await goto(signOutRedirectUrl, { replaceState: true });
+			clearSignOutRedirectPending();
 		} catch (error) {
 			clearSignOutRedirectPending();
 			throw error;

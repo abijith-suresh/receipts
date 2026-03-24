@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
+	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
 	import { useClerkContext } from 'svelte-clerk';
 	import { fade } from 'svelte/transition';
@@ -46,7 +47,9 @@
 
 		try {
 			markSignOutRedirectPending();
-			await clerk.clerk.signOut({ redirectUrl: signOutRedirectUrl });
+			await clerk.clerk.signOut();
+			await goto(signOutRedirectUrl, { replaceState: true });
+			clearSignOutRedirectPending();
 		} catch (error) {
 			clearSignOutRedirectPending();
 			throw error;
