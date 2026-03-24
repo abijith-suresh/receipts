@@ -6,21 +6,50 @@
 */
 @theme {
 	/* Typography */
-	--font-display: "Instrument Serif", Georgia, serif;
-	--font-body: "DM Sans", system-ui, sans-serif;
+	--font-display: "Satoshi", system-ui, sans-serif;
+	--font-body: "Satoshi", system-ui, sans-serif;
 
-	/* Semantic colors */
-	--color-ink: #18181b;
-	--color-muted: #71717a;
+	/* Eyebrow / label system */
+	--font-size-eyebrow: 0.6875rem;
+	--letter-spacing-eyebrow: 0.12em;
+
+	/* Semantic colors — warm, editorial palette */
+	--color-ink: #1c1917;
+	--color-ink-2: #44403c;
+	--color-muted: #78716c;
 	--color-surface: #ffffff;
-	--color-canvas: #fafaf8;
-	--color-border: #e4e4e7;
+	--color-canvas: #f5f3ef;
+	--color-border: #e7e2d8;
+	--color-border-strong: #d4cec3;
 
 	/* Brand — teal */
 	--color-brand: #0d9488;
 	--color-brand-strong: #0f766e;
 	--color-brand-soft: #f0fdfa;
 	--color-brand-muted: #99f6e4;
+
+	/* Semantic feedback */
+	--color-error: #dc2626;
+	--color-error-bg: #fef2f2;
+	--color-error-border: #fecaca;
+	--color-success: #0d9488;
+	--color-success-bg: #f0fdfa;
+	--color-success-border: #99f6e4;
+
+	/* Border radii */
+	--radius-sm: 0.5rem;
+	--radius-md: 0.75rem;
+	--radius-card: 1rem;
+	--radius-pill: 9999px;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+	--shadow-card:
+		0 4px 24px -8px rgb(0 0 0 / 0.08), 0 1px 3px -1px rgb(0 0 0 / 0.04);
+	--shadow-md:
+		0 8px 32px -12px rgb(0 0 0 / 0.12), 0 2px 8px -4px rgb(0 0 0 / 0.06);
+	--shadow-lg:
+		0 24px 48px -16px rgb(0 0 0 / 0.16), 0 4px 16px -8px rgb(0 0 0 / 0.08);
 
 	/* Animations */
 	--animate-fade-up: fade-up 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -53,9 +82,9 @@
 */
 @layer base {
 	html {
-		background-color: #fafaf8;
-		font-family: "DM Sans", system-ui, sans-serif;
-		color: #18181b;
+		background-color: var(--color-canvas);
+		font-family: "Satoshi", system-ui, sans-serif;
+		color: var(--color-ink);
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		scroll-behavior: smooth;
@@ -65,7 +94,7 @@
 	body {
 		min-height: 100vh;
 		margin: 0;
-		background-color: #fafaf8;
+		background-color: var(--color-canvas);
 	}
 
 	a {
@@ -96,4 +125,51 @@
 [data-reveal].revealed {
 	opacity: 1;
 	transform: translateY(0);
+}
+
+/* View Transitions API — subtle crossfade on page navigation */
+@keyframes vt-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes vt-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	/* Suppress full-page root transition */
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
+	}
+
+	/* Sidebar: completely static, never animates */
+	::view-transition-old(sidebar),
+	::view-transition-new(sidebar) {
+		animation: none;
+	}
+
+	/* Only the main content area fades */
+	::view-transition-old(main-content) {
+		animation: 120ms ease-out both vt-fade-out;
+	}
+	::view-transition-new(main-content) {
+		animation: 180ms ease-out both vt-fade-in;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(*) {
+		animation-duration: 0.001ms !important;
+	}
 }

@@ -8,15 +8,17 @@
 
 <!-- Hero -->
 <section class="py-20 pb-8 text-center">
-	<h1
-		class="font-display text-4xl sm:text-5xl text-ink mb-4"
-		style="letter-spacing: -0.02em;"
-	>
-		What's new.
-	</h1>
-	<p class="text-muted text-base sm:text-lg">
-		Every update to receipts.cv, in reverse chronological order.
-	</p>
+	<div class="mx-auto max-w-6xl px-6">
+		<h1
+			class="font-display text-4xl sm:text-5xl text-ink mb-4"
+			style="letter-spacing: -0.02em;"
+		>
+			What's new.
+		</h1>
+		<p class="text-muted text-base sm:text-lg">
+			Every update to Receipts, in reverse chronological order.
+		</p>
+	</div>
 </section>
 
 <!-- Changelog entries -->
@@ -68,7 +70,7 @@
 				<span class="entry-date">February 2026</span>
 			</div>
 			<div class="entry-title">Initial launch — the core logging loop</div>
-			<p class="entry-desc">The first version of receipts.cv is live.</p>
+			<p class="entry-desc">The first version of Receipts is live.</p>
 			<ul class="entry-bullets">
 				<li>
 					<span class="bullet-dot"></span>
@@ -106,7 +108,7 @@
 			</div>
 			<div class="entry-title">Project started</div>
 			<p class="entry-desc">
-				receipts.cv began as a personal tool — a way to remember what actually happened at work,
+				Receipts began as a personal tool — a way to remember what actually happened at work,
 				week to week.
 			</p>
 			<p class="entry-desc" style="margin-bottom: 0;">
@@ -185,7 +187,7 @@
 	}
 
 	.version-badge.old {
-		background-color: #f4f4f5;
+		background-color: var(--color-canvas);
 		color: var(--color-muted);
 	}
 

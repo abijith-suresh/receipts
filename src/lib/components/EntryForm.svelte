@@ -5,6 +5,7 @@ import { goto } from '$app/navigation';
 import { api } from '$lib/convex';
 import { getTodayLocalDate } from '$lib/utils/date';
 import { validateEntry } from '$lib/utils/entries';
+import Button from '$lib/components/ui/Button.svelte';
 
 const convex = useConvexClient();
 
@@ -75,9 +76,9 @@ async function handleSubmit(event: SubmitEvent) {
 
 	<div class="form-footer">
 		<a class="back-link" href="/dashboard">← Back to timeline</a>
-		<button class="btn-submit" type="submit" disabled={isSaving}>
+		<Button type="submit" disabled={isSaving}>
 			{isSaving ? 'Saving…' : 'Save entry'}
-		</button>
+		</Button>
 	</div>
 </form>
 
@@ -202,29 +203,5 @@ async function handleSubmit(event: SubmitEvent) {
 
 .back-link:hover {
 	color: var(--color-ink);
-}
-
-.btn-submit {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.625rem 1.25rem;
-	border-radius: 9999px;
-	border: none;
-	background-color: var(--color-ink);
-	color: #fff;
-	font-size: 0.875rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-	transform: translateY(-1px);
-	background-color: var(--color-brand-strong);
-}
-
-.btn-submit:disabled {
-	opacity: 0.55;
-	cursor: not-allowed;
 }
 </style>

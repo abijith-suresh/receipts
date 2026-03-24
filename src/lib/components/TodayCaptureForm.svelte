@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { useConvexClient } from 'convex-svelte';
+	import { slide } from 'svelte/transition';
 
 	import { api, type LogEntry } from '$lib/convex';
 	import { validateEntry } from '$lib/utils/entries';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	const convex = useConvexClient();
 
@@ -20,11 +22,25 @@
 	let errorMessage = $state<string | null>(null);
 	let isSaving = $state(false);
 	let showDateField = $state(false);
+	let textareaElement = $state<HTMLTextAreaElement | null>(null);
 
 	$effect(() => {
 		rawInput = entry?.rawInput ?? '';
 		errorMessage = null;
 	});
+
+	$effect(() => {
+		if (textareaElement && rawInput !== undefined) {
+			autoResize();
+		}
+	});
+
+	function autoResize() {
+		if (textareaElement) {
+			textareaElement.style.height = 'auto';
+			textareaElement.style.height = textareaElement.scrollHeight + 'px';
+		}
+	}
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -54,16 +70,18 @@
 
 <form class="capture-form" onsubmit={handleSubmit}>
 	<div class="capture-header">
+		<span class="capture-state">{entry ? 'Saved draft loaded' : 'Not saved yet'}</span>
 		<button type="button" class="date-link" onclick={() => (showDateField = !showDateField)}>
 			{showDateField ? 'Hide date' : 'Change date'}
 		</button>
-		<span class="capture-state">{entry ? 'Saved draft loaded' : 'Not saved yet'}</span>
 	</div>
 
 	{#if showDateField}
-		<div class="date-field">
-			<label class="field-label" for="entry-date">Entry date</label>
-			<input id="entry-date" class="field-input" type="date" bind:value={entryDate} />
+		<div transition:slide={{ duration: 220 }}>
+			<div class="date-field">
+				<label class="field-label" for="entry-date">Entry date</label>
+				<input id="entry-date" class="field-input" type="date" bind:value={entryDate} />
+			</div>
 		</div>
 	{/if}
 
@@ -73,6 +91,8 @@
 		class="field-textarea"
 		placeholder="Write it the way you would say it. Shipments, meetings, blockers, wins, loose notes — it all counts."
 		bind:value={rawInput}
+		bind:this={textareaElement}
+		oninput={autoResize}
 	></textarea>
 
 	{#if errorMessage}
@@ -80,13 +100,10 @@
 	{/if}
 
 	<div class="form-footer">
-		<p class="footer-note">Start rough. Refine later.</p>
-		<div class="footer-actions">
-			<span class="char-count">{rawInput.trim().length} chars</span>
-			<button class="btn-submit" type="submit" disabled={isSaving}>
-				{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
-			</button>
-		</div>
+		<span class="char-count">{rawInput.trim().length} chars</span>
+		<Button type="submit" disabled={isSaving}>
+			{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
+		</Button>
 	</div>
 </form>
 
@@ -94,12 +111,11 @@
 .capture-form {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-	padding: 1.5rem;
-	border-radius: 1.5rem;
+	gap: 0.75rem;
+	padding: 1rem;
+	border-radius: 1rem;
 	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 94%, white 6%);
-	box-shadow: 0 32px 70px -48px rgba(15, 23, 42, 0.2);
+	background: var(--color-surface);
 }
 
 .capture-header {
@@ -107,40 +123,37 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	flex-wrap: wrap;
 }
 
 .date-link {
 	border: none;
 	padding: 0;
 	background: transparent;
-	font-size: 0.82rem;
+	font-size: 0.75rem;
 	font-weight: 600;
 	color: var(--color-ink);
 	cursor: pointer;
+	transition: color 0.15s ease;
 }
 
 .date-link:hover {
 	color: var(--color-brand-strong);
 }
 
-.capture-state,
-.footer-note,
-.char-count {
-	font-size: 0.82rem;
+.capture-state {
+	font-size: 0.75rem;
 	color: var(--color-muted);
 }
 
 .date-field {
 	display: flex;
 	flex-direction: column;
-	gap: 0.45rem;
+	gap: 0.375rem;
 	max-width: 12rem;
 }
 
-.field-label,
-.sr-only {
-	font-size: 0.6875rem;
+.field-label {
+	font-size: 0.75rem;
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
@@ -159,36 +172,49 @@
 	border: 0;
 }
 
-.field-input,
-.field-textarea {
+.field-input {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 0.8rem 0.95rem;
-	border-radius: 1rem;
+	padding: 0.625rem 0.75rem;
+	border-radius: 0.75rem;
 	border: 1px solid var(--color-border);
 	background: var(--color-canvas);
 	color: var(--color-ink);
-	font-size: 0.98rem;
+	font-size: 0.875rem;
 	outline: none;
 	transition:
 		border-color 0.15s ease,
 		box-shadow 0.15s ease;
 }
 
-.field-input:focus,
-.field-textarea:focus {
+.field-input:focus {
 	border-color: var(--color-brand);
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 14%, transparent);
 }
 
 .field-textarea {
-	min-height: 20rem;
-	resize: vertical;
-	padding-top: 1.2rem;
-	padding-bottom: 1.2rem;
-	font-size: 1.05rem;
-	line-height: 1.9;
-	border-radius: 1.25rem;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.875rem 1rem;
+	border-radius: 0.75rem;
+	border: 1px solid var(--color-border);
+	background: var(--color-canvas);
+	color: var(--color-ink);
+	font-size: 1rem;
+	line-height: 1.75;
+	min-height: 8rem;
+	max-height: 16rem;
+	resize: none;
+	overflow-y: auto;
+	outline: none;
+	transition:
+		border-color 0.15s ease,
+		box-shadow 0.15s ease;
+}
+
+.field-textarea:focus {
+	border-color: var(--color-brand);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 14%, transparent);
 }
 
 .field-textarea::placeholder {
@@ -198,11 +224,11 @@
 
 .error-msg {
 	margin: 0;
-	padding: 0.8rem 0.95rem;
-	border-radius: 0.95rem;
+	padding: 0.625rem 0.875rem;
+	border-radius: 0.75rem;
 	border: 1px solid #fecaca;
 	background: #fef2f2;
-	font-size: 0.875rem;
+	font-size: 0.75rem;
 	color: #b91c1c;
 }
 
@@ -211,38 +237,10 @@
 	align-items: center;
 	justify-content: space-between;
 	gap: 1rem;
-	flex-wrap: wrap;
 }
 
-.footer-actions {
-	display: flex;
-	align-items: center;
-	gap: 0.85rem;
-	flex-wrap: wrap;
-}
-
-.btn-submit {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	padding: 0.78rem 1.35rem;
-	border-radius: 9999px;
-	border: none;
-	background: var(--color-ink);
-	color: #fff;
-	font-size: 0.875rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: transform 0.15s ease, background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-	transform: translateY(-1px);
-	background: var(--color-brand-strong);
-}
-
-.btn-submit:disabled {
-	opacity: 0.55;
-	cursor: not-allowed;
+.char-count {
+	font-size: 0.75rem;
+	color: var(--color-muted);
 }
 </style>

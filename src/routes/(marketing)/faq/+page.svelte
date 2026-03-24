@@ -6,6 +6,10 @@
 	/>
 </svelte:head>
 
+<script lang="ts">
+	import Accordion from '$lib/components/ui/Accordion.svelte';
+</script>
+
 <!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
 <section class="mx-auto max-w-6xl px-6 py-20 pb-12 text-center">
 	<h1
@@ -25,85 +29,58 @@
 	<!-- Category: About the product -->
 	<p class="category-label">About the product</p>
 
-	<details>
-		<summary>What is receipts.cv?</summary>
-		<div class="answer">
-			receipts.cv is a private daily work journal for professionals. You write what you worked on
-			in plain English — AI structures it into tasks, skills, and impact. Over time, your entries
-			build a searchable career record you can use in performance reviews, raise conversations,
-			and 1-on-1s.
-		</div>
-	</details>
+	<Accordion question="What is Receipts?">
+		Receipts is a private daily work journal for professionals. You write what you worked on
+		in plain English — AI structures it into tasks, skills, and impact. Over time, your entries
+		build a searchable career record you can use in performance reviews, raise conversations,
+		and 1-on-1s.
+	</Accordion>
 
-	<details>
-		<summary>Who is this for?</summary>
-		<div class="answer">
-			Primarily individual contributors — engineers, designers, product managers, and anyone who
-			wants a concrete record of their work. If you've ever been asked "what have you been working
-			on?" and struggled to remember, receipts.cv is for you.
-		</div>
-	</details>
+	<Accordion question="Who is this for?">
+		Primarily individual contributors — engineers, designers, product managers, and anyone who
+		wants a concrete record of their work. If you've ever been asked "what have you been working
+		on?" and struggled to remember, Receipts is for you.
+	</Accordion>
 
-	<details>
-		<summary>Does it work on mobile?</summary>
-		<div class="answer">
-			Yes. The web app is fully responsive and works well on any device. A dedicated mobile app
-			is on the roadmap.
-		</div>
-	</details>
+	<Accordion question="Does it work on mobile?">
+		Yes. The web app is fully responsive and works well on any device. A dedicated mobile app
+		is on the roadmap.
+	</Accordion>
 
 	<!-- Category: Your data & privacy -->
 	<p class="category-label mt-10">Your data &amp; privacy</p>
 
-	<details>
-		<summary>Is my data private?</summary>
-		<div class="answer">
-			Yes. Your entries are private to you by default — no one else can see them. We never use
-			your data for AI model training.
-		</div>
-	</details>
+	<Accordion question="Is my data private?">
+		Yes. Your entries are private to you by default — no one else can see them. We never use
+		your data for AI model training.
+	</Accordion>
 
-	<details>
-		<summary>How is my data stored?</summary>
-		<div class="answer">
-			Your data is stored securely using Convex, a real-time cloud database. All data is
-			encrypted at rest and in transit.
-		</div>
-	</details>
+	<Accordion question="How is my data stored?">
+		Your data is stored securely using Convex, a real-time cloud database. All data is
+		encrypted at rest and in transit.
+	</Accordion>
 
-	<details>
-		<summary>Can I export my data?</summary>
-		<div class="answer">
-			Export functionality is on the Pro roadmap. Until then, you can always copy your entries
-			from the timeline.
-		</div>
-	</details>
+	<Accordion question="Can I export my data?">
+		Export functionality is on the Pro roadmap. Until then, you can always copy your entries
+		from the timeline.
+	</Accordion>
 
 	<!-- Category: Billing -->
 	<p class="category-label mt-10">Billing</p>
 
-	<details>
-		<summary>What's included in the free plan?</summary>
-		<div class="answer">
-			The free plan includes unlimited daily logging, unlimited timeline storage, and 3 AI report
-			generations per month. That's enough to build the habit.
-		</div>
-	</details>
+	<Accordion question="What's included in the free plan?">
+		The free plan includes unlimited daily logging, unlimited timeline storage, and 3 AI report
+		generations per month. That's enough to build the habit.
+	</Accordion>
 
-	<details>
-		<summary>How do I upgrade to Pro?</summary>
-		<div class="answer">
-			From your settings page, you can upgrade to Pro for $10/month. You can cancel anytime.
-		</div>
-	</details>
+	<Accordion question="How do I upgrade to Pro?">
+		From your settings page, you can upgrade to Pro for $10/month. You can cancel anytime.
+	</Accordion>
 
-	<details>
-		<summary>Can I cancel my Pro subscription?</summary>
-		<div class="answer">
-			Yes, cancel anytime from settings. You won't be charged again, and you'll keep access until
-			the end of the billing period.
-		</div>
-	</details>
+	<Accordion question="Can I cancel my Pro subscription?">
+		Yes, cancel anytime from settings. You won't be charged again, and you'll keep access until
+		the end of the billing period.
+	</Accordion>
 </div>
 
 <!-- ══════════════════════════════════ BOTTOM CTA ═════════════════════════════════════ -->
@@ -127,7 +104,7 @@
 				Email us
 			</a>
 			<a
-				href="/sign-up"
+				href="/login"
 				class="inline-flex items-center rounded-xl bg-brand px-7 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-strong hover:shadow-md"
 			>
 				Start for free
@@ -144,55 +121,5 @@
 		text-transform: uppercase;
 		color: var(--color-muted);
 		margin-bottom: 0.25rem;
-	}
-
-	details {
-		border-bottom: 1px solid var(--color-border);
-	}
-
-	details:first-of-type {
-		border-top: 1px solid var(--color-border);
-	}
-
-	/* Reset first-of-type for grouped sections — target the first details after each label */
-	.category-label + details {
-		border-top: 1px solid var(--color-border);
-	}
-
-	summary {
-		cursor: pointer;
-		list-style: none;
-		padding: 1.25rem 0;
-		font-size: 0.9375rem;
-		font-weight: 500;
-		color: var(--color-ink);
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		gap: 1rem;
-	}
-
-	summary::-webkit-details-marker {
-		display: none;
-	}
-
-	summary::after {
-		content: '+';
-		font-size: 1.25rem;
-		font-weight: 300;
-		color: var(--color-muted);
-		flex-shrink: 0;
-		transition: transform 0.2s ease;
-	}
-
-	details[open] > summary::after {
-		content: '−';
-	}
-
-	.answer {
-		padding-bottom: 1.25rem;
-		font-size: 0.9375rem;
-		line-height: 1.75;
-		color: var(--color-muted);
 	}
 </style>

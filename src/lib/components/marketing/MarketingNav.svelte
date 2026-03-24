@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import BrandWordmark from '$lib/components/BrandWordmark.svelte';
 
 	let mobileOpen = $state(false);
 
@@ -24,23 +25,30 @@
 
 <nav class="sticky top-0 z-50 border-b border-border bg-canvas/95 backdrop-blur-sm">
 	<div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-		<!-- Logo -->
-		<a href="/" class="flex items-center gap-2.5 shrink-0" onclick={closeMobile}>
-			<span class="font-display text-xl text-ink" style="letter-spacing: -0.01em">receipts.cv</span>
-		</a>
+		<div class="shrink-0">
+			<BrandWordmark
+				href="/"
+				size="md"
+				descriptor="Your private proof of work"
+				descriptorHiddenOnMobile={true}
+			/>
+		</div>
 
 		<!-- Desktop nav -->
-		<div class="hidden ml-auto items-center gap-1 md:flex">
+		<div class="ml-auto hidden items-center gap-1 md:flex">
 			{#each navLinks as link}
 				<a
 					href={link.href}
-					class="rounded-lg px-4 py-2 text-sm transition-colors duration-150"
+					class="relative rounded-lg px-4 py-2 text-sm transition-colors duration-150"
 					class:text-ink={isActive(link.href)}
 					class:font-medium={isActive(link.href)}
 					class:text-muted={!isActive(link.href)}
 					class:hover:text-ink={!isActive(link.href)}
 				>
 					{link.label}
+					{#if isActive(link.href)}
+						<span class="absolute bottom-0.5 left-4 right-4 h-px rounded-full bg-brand"></span>
+					{/if}
 				</a>
 			{/each}
 		</div>
@@ -48,24 +56,24 @@
 		<!-- Desktop CTAs -->
 		<div class="hidden items-center gap-1 md:flex">
 			<a
-				href="/sign-in"
-				class="rounded-lg px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+				href="/login"
+				class="rounded-full px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
 			>
 				Sign in
 			</a>
 			<a
-				href="/sign-up"
-				class="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
+				href="/login"
+				class="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
 			>
 				Get started
 			</a>
 		</div>
 
-		<!-- Mobile: logo + get started + hamburger -->
+		<!-- Mobile: get started + hamburger -->
 		<div class="flex items-center gap-2 md:hidden">
 			<a
-				href="/sign-up"
-				class="rounded-lg bg-brand px-3.5 py-1.5 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
+				href="/login"
+				class="rounded-full bg-brand px-3.5 py-1.5 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
 			>
 				Get started
 			</a>
@@ -109,7 +117,7 @@
 				{/each}
 				<div class="mt-2 border-t border-border pt-2">
 					<a
-						href="/sign-in"
+						href="/login"
 						onclick={closeMobile}
 						class="block rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:text-ink"
 					>

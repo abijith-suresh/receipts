@@ -1,13 +1,17 @@
 <script lang="ts">
-import { onMount } from 'svelte';
 import { goto } from '$app/navigation';
+import { env } from '$env/dynamic/public';
+import { onMount } from 'svelte';
 import { useClerkContext } from 'svelte-clerk';
 
+import { resolveClerkPaths } from '$lib/auth/clerkPaths';
 import { convexAuthReady } from '$lib/auth/convexAuth';
+import { clearSignOutRedirectPending, signOutRedirectPending } from '$lib/auth/signOutFlow';
 import AppShell from '$lib/components/AppShell.svelte';
 import EnsureUserBootstrap from '$lib/components/EnsureUserBootstrap.svelte';
 
 const clerk = useClerkContext();
+const clerkPaths = resolveClerkPaths(env);
 
 let { children } = $props();
 let mounted = $state(false);
@@ -21,7 +25,13 @@ $effect(() => {
 		return;
 	}
 
-	void goto('/sign-in');
+	const destination = $signOutRedirectPending ? clerkPaths.signOutRedirectUrl : clerkPaths.signInUrl;
+
+	if ($signOutRedirectPending) {
+		clearSignOutRedirectPending();
+	}
+
+	void goto(destination, { replaceState: true });
 });
 
 const isSignedIn = $derived(!!clerk.auth.userId);

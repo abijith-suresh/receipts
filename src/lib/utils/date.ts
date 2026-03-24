@@ -1,10 +1,24 @@
-export function getTodayLocalDate() {
-	const now = new Date();
-	const year = now.getFullYear();
-	const month = `${now.getMonth() + 1}`.padStart(2, '0');
-	const day = `${now.getDate()}`.padStart(2, '0');
+export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 
-	return `${year}-${month}-${day}`;
+export function getTodayLocalDate(timeZone?: string) {
+	const now = new Date();
+
+	if (timeZone) {
+		try {
+			return formatDatePartsAsEntryDate(
+				new Intl.DateTimeFormat('en', {
+					timeZone,
+					year: 'numeric',
+					month: '2-digit',
+					day: '2-digit',
+				}).formatToParts(now),
+			);
+		} catch {
+			return toLocalDateString(now);
+		}
+	}
+
+	return toLocalDateString(now);
 }
 
 export function parseLocalDate(entryDate: string) {
@@ -27,21 +41,24 @@ export function addMonths(entryDate: string, amount: number) {
 	return toLocalDateString(parsed);
 }
 
-export function startOfWeek(entryDate: string) {
+export function startOfWeek(entryDate: string, weekStartsOn: WeekStartsOn = 1) {
 	const parsed = parseLocalDate(entryDate);
 	const day = parsed.getDay();
-	const diff = day === 0 ? -6 : 1 - day;
-	parsed.setDate(parsed.getDate() + diff);
+	const offset = (day - normalizeWeekStartsOn(weekStartsOn) + 7) % 7;
+	parsed.setDate(parsed.getDate() - offset);
 
 	return toLocalDateString(parsed);
 }
 
-export function endOfWeek(entryDate: string) {
-	return addDays(startOfWeek(entryDate), 6);
+export function endOfWeek(entryDate: string, weekStartsOn: WeekStartsOn = 1) {
+	return addDays(startOfWeek(entryDate, weekStartsOn), 6);
 }
 
-export function getWeekRange(entryDate: string) {
-	const start = startOfWeek(entryDate);
+export function getWeekRange(
+	entryDate: string,
+	weekStartsOn: WeekStartsOn = 1,
+) {
+	const start = startOfWeek(entryDate, weekStartsOn);
 
 	return {
 		start,
@@ -49,10 +66,27 @@ export function getWeekRange(entryDate: string) {
 	};
 }
 
-export function listWeekDates(entryDate: string) {
-	const start = startOfWeek(entryDate);
+export function listWeekDates(
+	entryDate: string,
+	weekStartsOn: WeekStartsOn = 1,
+) {
+	const start = startOfWeek(entryDate, weekStartsOn);
 
 	return Array.from({ length: 7 }, (_, index) => addDays(start, index));
+}
+
+export function listWeekdayLabels(weekStartsOn: WeekStartsOn = 1) {
+	const normalizedWeekStart = normalizeWeekStartsOn(weekStartsOn);
+	const sunday = new Date(2024, 0, 7);
+
+	return Array.from({ length: 7 }, (_, index) => {
+		const date = new Date(sunday);
+		date.setDate(sunday.getDate() + normalizedWeekStart + index);
+
+		return new Intl.DateTimeFormat('en', {
+			weekday: 'short',
+		}).format(date);
+	});
 }
 
 export function getMonthRange(entryDate: string) {
@@ -66,14 +100,19 @@ export function getMonthRange(entryDate: string) {
 	};
 }
 
-export function listMonthGridDates(entryDate: string) {
+export function listMonthGridDates(
+	entryDate: string,
+	weekStartsOn: WeekStartsOn = 1,
+) {
 	const parsed = parseLocalDate(entryDate);
 	const monthStart = new Date(parsed.getFullYear(), parsed.getMonth(), 1);
 	const monthEnd = new Date(parsed.getFullYear(), parsed.getMonth() + 1, 0);
 	const firstGridDate = parseLocalDate(
-		startOfWeek(toLocalDateString(monthStart)),
+		startOfWeek(toLocalDateString(monthStart), weekStartsOn),
 	);
-	const lastGridDate = parseLocalDate(endOfWeek(toLocalDateString(monthEnd)));
+	const lastGridDate = parseLocalDate(
+		endOfWeek(toLocalDateString(monthEnd), weekStartsOn),
+	);
 	const dates: Array<{ date: string; inMonth: boolean }> = [];
 
 	for (
@@ -90,8 +129,30 @@ export function listMonthGridDates(entryDate: string) {
 	return dates;
 }
 
-export function formatRelativeEntryDate(entryDate: string) {
-	const today = getTodayLocalDate();
+export function formatWeekRangeLabel(
+	entryDate: string,
+	weekStartsOn: WeekStartsOn = 1,
+) {
+	const { start, end } = getWeekRange(entryDate, weekStartsOn);
+	const startDate = parseLocalDate(start);
+	const endDate = parseLocalDate(end);
+
+	if (
+		startDate.getFullYear() === endDate.getFullYear() &&
+		startDate.getMonth() === endDate.getMonth()
+	) {
+		return `${new Intl.DateTimeFormat('en', { month: 'long' }).format(startDate)} ${startDate.getDate()}-${endDate.getDate()}, ${startDate.getFullYear()}`;
+	}
+
+	if (startDate.getFullYear() === endDate.getFullYear()) {
+		return `${formatEntryDateCompact(start)} - ${formatEntryDateCompact(end)}, ${startDate.getFullYear()}`;
+	}
+
+	return `${formatEntryDate(start)} - ${formatEntryDate(end)}`;
+}
+
+export function formatRelativeEntryDate(entryDate: string, timeZone?: string) {
+	const today = getTodayLocalDate(timeZone);
 
 	if (entryDate === today) {
 		return 'Today';
@@ -158,4 +219,20 @@ function toLocalDateString(date: Date) {
 	const day = `${date.getDate()}`.padStart(2, '0');
 
 	return `${year}-${month}-${day}`;
+}
+
+function formatDatePartsAsEntryDate(parts: Intl.DateTimeFormatPart[]) {
+	const year = parts.find((part) => part.type === 'year')?.value;
+	const month = parts.find((part) => part.type === 'month')?.value;
+	const day = parts.find((part) => part.type === 'day')?.value;
+
+	if (!year || !month || !day) {
+		throw new Error('Unable to resolve date parts for timezone.');
+	}
+
+	return `${year}-${month}-${day}`;
+}
+
+function normalizeWeekStartsOn(weekStartsOn: WeekStartsOn) {
+	return (((weekStartsOn % 7) + 7) % 7) as WeekStartsOn;
 }

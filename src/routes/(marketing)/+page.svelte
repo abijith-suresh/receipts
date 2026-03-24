@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>receipts.cv — Prove your worth. Show your receipts.</title>
+	<title>receipts.cv — Your private proof of work</title>
 	<meta
 		name="description"
 		content="Log your day in plain language. receipts.cv turns your work notes into a structured career record — ready for 1-on-1s, performance reviews, and raise conversations."
@@ -7,32 +7,14 @@
 </svelte:head>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
-
-	onMount(() => {
-		const observer = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (entry.isIntersecting) {
-						entry.target.classList.add('revealed');
-						observer.unobserve(entry.target);
-					}
-				});
-			},
-			{ threshold: 0.1, rootMargin: '0px 0px -20px 0px' }
-		);
-
-		document.querySelectorAll('[data-reveal]').forEach((el) => observer.observe(el));
-
-		return () => observer.disconnect();
-	});
+	import { reveal } from '$lib/actions/reveal.js';
 </script>
 
 <!-- ══════════════════════════════════════ HERO ══════════════════════════════════════ -->
 <section class="mx-auto max-w-6xl px-6 pb-28 pt-32 text-center">
 	<!-- Eyebrow -->
 	<p
-		class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-muted"
+		class="animate-fade-up inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-[0.6875rem] font-medium tracking-[0.12em] text-muted"
 	>
 		<span class="h-1.5 w-1.5 rounded-full bg-brand"></span>
 		Career documentation for individual contributors
@@ -61,7 +43,7 @@
 		style="animation-delay: 0.3s"
 	>
 		<a
-			href="/sign-up"
+			href="/login"
 			class="rounded-xl bg-brand px-7 py-3 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-strong hover:shadow-md active:translate-y-0"
 		>
 			Get started — it's free
@@ -198,13 +180,13 @@
 							Skills demonstrated
 						</p>
 						<div class="mt-2 flex flex-wrap gap-1.5">
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								leadership
 							</span>
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								collaboration
 							</span>
-							<span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-600">
+							<span class="rounded-full bg-canvas px-2.5 py-0.5 text-xs text-ink-2">
 								technical writing
 							</span>
 						</div>
@@ -237,8 +219,9 @@
 	<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 		<!-- Feature 1 -->
 		<div
-			data-reveal
-			class="rounded-2xl border border-border bg-surface p-7 transition-shadow duration-300 hover:shadow-md"
+		data-reveal
+		use:reveal
+		class="rounded-2xl border border-border bg-surface p-7 transition-shadow duration-300 hover:shadow-md"
 		>
 			<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-soft text-brand">
 				<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
@@ -261,6 +244,7 @@
 		<!-- Feature 2 -->
 		<div
 			data-reveal
+			use:reveal
 			class="rounded-2xl border border-border bg-surface p-7 transition-shadow duration-300 hover:shadow-md"
 			style="transition-delay: 0.08s"
 		>
@@ -292,6 +276,7 @@
 		<!-- Feature 3 -->
 		<div
 			data-reveal
+			use:reveal
 			class="rounded-2xl border border-border bg-surface p-7 transition-shadow duration-300 hover:shadow-md sm:col-span-2 lg:col-span-1"
 			style="transition-delay: 0.16s"
 		>
@@ -313,7 +298,7 @@
 <!-- ══════════════════════════════ HOW IT WORKS ═══════════════════════════════════════ -->
 <section id="how-it-works" class="mx-auto max-w-6xl px-6 py-20">
 	<!-- Section header -->
-	<div class="mb-16 text-center" data-reveal>
+	<div class="mb-16 text-center" data-reveal use:reveal>
 		<h2
 			class="font-display text-4xl text-ink sm:text-5xl"
 			style="letter-spacing: -0.03em; line-height: 1.08"
@@ -328,7 +313,7 @@
 	<!-- Steps -->
 	<div class="grid gap-10 sm:grid-cols-3 sm:gap-6">
 		<!-- Step 1 -->
-		<div data-reveal class="flex flex-col">
+		<div data-reveal use:reveal class="flex flex-col">
 			<div class="step-number font-display text-7xl text-brand/20" style="line-height: 1">1</div>
 			<div class="mt-4 flex-1 rounded-2xl border border-border bg-surface p-6">
 				<h3 class="text-base font-semibold text-ink">Write your day</h3>
@@ -339,7 +324,7 @@
 		</div>
 
 		<!-- Step 2 -->
-		<div data-reveal class="flex flex-col" style="transition-delay: 0.12s">
+		<div data-reveal use:reveal class="flex flex-col" style="transition-delay: 0.12s">
 			<div class="step-number font-display text-7xl text-brand/20" style="line-height: 1">2</div>
 			<div class="mt-4 flex-1 rounded-2xl border border-border bg-surface p-6">
 				<h3 class="text-base font-semibold text-ink">Review the structure</h3>
@@ -351,7 +336,7 @@
 		</div>
 
 		<!-- Step 3 -->
-		<div data-reveal class="flex flex-col" style="transition-delay: 0.24s">
+		<div data-reveal use:reveal class="flex flex-col" style="transition-delay: 0.24s">
 			<div class="step-number font-display text-7xl text-brand/20" style="line-height: 1">3</div>
 			<div class="mt-4 flex-1 rounded-2xl border border-border bg-surface p-6">
 				<h3 class="text-base font-semibold text-ink">Generate talking points</h3>
@@ -368,6 +353,7 @@
 <section class="mx-auto max-w-6xl px-6 pb-24">
 	<div
 		data-reveal
+		use:reveal
 		class="rounded-3xl border border-brand-muted/70 bg-brand-soft px-8 py-20 text-center"
 	>
 		<h2
@@ -380,7 +366,7 @@
 			Free forever for the core habit. No credit card required.
 		</p>
 		<a
-			href="/sign-up"
+			href="/login"
 			class="mt-9 inline-flex items-center rounded-xl bg-brand px-8 py-3.5 text-sm font-medium text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-brand-strong hover:shadow-md"
 		>
 			Create your free account
@@ -397,7 +383,7 @@
 		box-shadow:
 			0 4px 24px -6px rgba(13, 148, 136, 0.12),
 			0 1px 3px rgba(0, 0, 0, 0.06),
-			0 0 0 1px rgba(228, 228, 231, 0.8);
+			0 0 0 1px rgba(231, 226, 216, 0.8);
 	}
 
 	/* Step numbers — large italic display numeral */

@@ -7,6 +7,21 @@ export default defineSchema({
 		email: v.optional(v.string()),
 		name: v.optional(v.string()),
 		imageUrl: v.optional(v.string()),
+		timezone: v.optional(v.string()),
+		weekStartsOn: v.optional(
+			v.union(
+				v.literal(0),
+				v.literal(1),
+				v.literal(2),
+				v.literal(3),
+				v.literal(4),
+				v.literal(5),
+				v.literal(6),
+			),
+		),
+		defaultHistoryView: v.optional(
+			v.union(v.literal('week'), v.literal('month'), v.literal('timeline')),
+		),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	}).index('by_clerk_id', ['clerkId']),

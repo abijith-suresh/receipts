@@ -1,3 +1,7 @@
+<script lang="ts">
+	import Button from '$lib/components/ui/Button.svelte';
+</script>
+
 <section class="empty">
 	<p class="empty-eyebrow">Start your receipts habit</p>
 	<h2 class="empty-title">Nothing logged yet.</h2>
@@ -5,7 +9,7 @@
 		Write the kind of update you wish you could remember three months from now: shipped work,
 		bugs fixed, hard conversations, blockers, and momentum.
 	</p>
-	<a class="empty-cta" href="/entry/new">Log today</a>
+	<Button href="/entry/new" class="empty-cta-btn" style="align-self: flex-start; margin-top: 0.5rem;">Log today</Button>
 </section>
 
 <style>
@@ -20,9 +24,9 @@
 }
 
 .empty-eyebrow {
-	font-size: 0.6875rem;
+	font-size: var(--font-size-eyebrow);
 	font-weight: 700;
-	letter-spacing: 0.2em;
+	letter-spacing: var(--letter-spacing-eyebrow);
 	text-transform: uppercase;
 	color: var(--color-brand-strong);
 	margin: 0;
@@ -43,25 +47,5 @@
 	color: var(--color-muted);
 	margin: 0;
 	max-width: 38rem;
-}
-
-.empty-cta {
-	display: inline-flex;
-	align-items: center;
-	margin-top: 0.5rem;
-	padding: 0.625rem 1.25rem;
-	border-radius: 9999px;
-	background-color: var(--color-ink);
-	color: #fff;
-	font-size: 0.875rem;
-	font-weight: 600;
-	text-decoration: none;
-	transition: transform 0.15s ease, background-color 0.15s ease;
-	align-self: flex-start;
-}
-
-.empty-cta:hover {
-	transform: translateY(-1px);
-	background-color: var(--color-brand-strong);
 }
 </style>

@@ -1,20 +1,20 @@
+<script lang="ts">
+	import BrandWordmark from '$lib/components/BrandWordmark.svelte';
+</script>
+
 <footer class="border-t border-border bg-canvas">
 	<div class="mx-auto max-w-6xl px-6 py-16">
-		<!-- Top section: brand + columns -->
 		<div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-			<!-- Brand column -->
 			<div class="lg:col-span-2">
-				<a href="/" class="inline-block">
-					<span class="font-display text-lg text-ink" style="letter-spacing: -0.01em">receipts.cv</span>
-				</a>
-				<p class="mt-3 max-w-xs text-sm leading-relaxed text-muted">
-					Prove your worth. Show your receipts. The career documentation tool built for individual contributors.
+				<BrandWordmark href="/" size="lg" descriptor="Your private proof of work" />
+				<p class="mt-4 max-w-sm text-sm leading-relaxed text-muted">
+					Build a private record of your work, wins, and impact - ready for reviews, 1-on-1s,
+					and raise conversations.
 				</p>
 			</div>
 
-			<!-- Product column -->
 			<div>
-				<p class="text-[11px] font-semibold uppercase tracking-widest text-muted">Product</p>
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Product</p>
 				<ul class="mt-4 space-y-3">
 					<li>
 						<a href="/features" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
@@ -39,17 +39,16 @@
 				</ul>
 			</div>
 
-			<!-- Company column -->
 			<div>
-				<p class="text-[11px] font-semibold uppercase tracking-widest text-muted">Account</p>
+				<p class="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-muted">Account</p>
 				<ul class="mt-4 space-y-3">
 					<li>
-						<a href="/sign-in" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
+						<a href="/login" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
 							Sign in
 						</a>
 					</li>
 					<li>
-						<a href="/sign-up" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
+						<a href="/login" class="text-sm text-muted transition-colors duration-150 hover:text-ink">
 							Get started free
 						</a>
 					</li>
@@ -57,11 +56,10 @@
 			</div>
 		</div>
 
-		<!-- Bottom bar -->
 		<div class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-8">
-			<p class="text-xs text-muted">© 2025 receipts.cv. All rights reserved.</p>
+			<p class="text-xs text-muted">© 2026 Receipts. All rights reserved.</p>
 			<p class="text-xs text-muted">
-				Built for ICs who do great work and want proof of it.
+				Built for individual contributors who want proof of their work.
 			</p>
 		</div>
 	</div>

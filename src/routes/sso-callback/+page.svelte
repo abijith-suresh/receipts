@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Signing you in - receipts.cv</title>
+	<title>Signing you in — receipts.cv</title>
 	<meta
 		name="description"
 		content="Completing your receipts.cv sign-in and taking you to your dashboard."

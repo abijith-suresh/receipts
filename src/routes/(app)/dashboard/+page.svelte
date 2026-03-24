@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { useQuery } from 'convex-svelte';
-	import { goto } from '$app/navigation';
 	import { useClerkContext } from 'svelte-clerk';
 	import type { LogEntry } from '$lib/convex';
+	import { fade } from 'svelte/transition';
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
 	import TodayCaptureForm from '$lib/components/TodayCaptureForm.svelte';
@@ -10,22 +10,22 @@
 	import { formatDateTime, formatEntryDate, formatRelativeEntryDate, getTodayLocalDate } from '$lib/utils/date';
 
 	const clerk = useClerkContext();
-	let activeDate = $state(getTodayLocalDate());
+	let activeDate = $state<string | null>(null);
 	let savedToast = $state(false);
 	let toastTimeout: ReturnType<typeof setTimeout> | null = null;
 	const ready = $derived(clerk.isLoaded && !!clerk.auth.userId && $convexAuthReady);
+	const settings = useQuery(api.users.settings, () => (ready ? {} : 'skip'));
+	const preferredTimezone = $derived(settings.data?.timezone);
+	const resolvedActiveDate = $derived(
+		activeDate ?? getTodayLocalDate(preferredTimezone),
+	);
 
 	const todayEntry = useQuery(
 		api.logEntries.getByDate,
-		() => (ready ? { entryDate: activeDate } : 'skip'),
-	);
-	const recentEntries = useQuery(
-		api.logEntries.listRecent,
-		() => (ready ? { limit: 4 } : 'skip'),
+		() => (ready ? { entryDate: resolvedActiveDate } : 'skip'),
 	);
 
 	const currentEntry = $derived((todayEntry.data as LogEntry | null | undefined) ?? null);
-	const currentRecentEntries = $derived((recentEntries.data as LogEntry[] | undefined) ?? []);
 
 	function handleSaved(entryDate: string) {
 		activeDate = entryDate;
@@ -37,301 +37,177 @@
 			savedToast = false;
 		}, 2200);
 	}
-
-	function openHistory(date: string) {
-		void goto(`/history?view=week&date=${date}`);
-	}
 </script>
 
 <div class="today-page">
-	<div class="utility-row">
-		<div class="utility-copy">
-			<p class="eyebrow">Today</p>
-			<h1>{formatRelativeEntryDate(activeDate)}</h1>
-			<p>{formatEntryDate(activeDate)}</p>
-		</div>
+	<header class="page-header">
+		<h1 class="page-title">{formatRelativeEntryDate(resolvedActiveDate, preferredTimezone)}</h1>
+		<p class="date-label">{formatEntryDate(resolvedActiveDate)}</p>
+	</header>
 
-		<div class="utility-actions">
-			<span class="privacy-pill">Private</span>
-			<a href="/history?view=week&date={activeDate}">Open history</a>
-		</div>
-	</div>
-
-	<section class="capture-block">
-		<div class="capture-copy">
-			<h2>What moved forward today?</h2>
-			<p>Write it the way you would say it. Keep the facts while they are still fresh.</p>
-		</div>
-
-		<TodayCaptureForm entryDate={activeDate} entry={currentEntry} onSaved={handleSaved} />
-
-		<div class="status-row">
-			{#if todayEntry.isLoading}
-				<span>Loading this day…</span>
-			{:else if todayEntry.error}
-				<span class="error">{todayEntry.error.message}</span>
-			{:else if savedToast && currentEntry}
-				<span>Saved {formatDateTime(currentEntry.updatedAt)}</span>
-			{:else if currentEntry}
-				<span>Last updated {formatDateTime(currentEntry.updatedAt)}</span>
-			{:else}
-				<span>Your receipt stays private.</span>
-			{/if}
-		</div>
-
-		{#if currentEntry}
-			<div class="saved-snapshot">
-				<p class="snapshot-label">Saved receipt</p>
-				<p class="snapshot-summary">{currentEntry.summary}</p>
-				<p class="snapshot-body">{currentEntry.rawInput}</p>
+	{#if !todayEntry.isLoading}
+		<div class="capture-card" in:fade={{ duration: 200 }}>
+			<div class="card-header">
+				<h2 class="card-title">What moved forward today?</h2>
+				<p class="card-subtitle">Write it the way you would say it. Keep the facts while they are still fresh.</p>
 			</div>
-		{/if}
-	</section>
 
-	<section class="recent-block">
-		<div class="recent-header">
-			<div>
-				<p class="recent-label">Recent</p>
-				<p class="recent-copy">A short way back into your past few receipts.</p>
+			<TodayCaptureForm entryDate={resolvedActiveDate} entry={currentEntry} onSaved={handleSaved} />
+
+			<div class="status-bar">
+				{#key `${todayEntry.isLoading}-${savedToast}-${!!currentEntry}`}
+					<span
+						class="status-text"
+						class:error={!!todayEntry.error}
+						in:fade={{ duration: 200 }}
+					>
+						{#if todayEntry.error}
+							{todayEntry.error.message}
+						{:else if savedToast && currentEntry}
+							Saved {formatDateTime(currentEntry.updatedAt)}
+						{:else if currentEntry}
+							Last updated {formatDateTime(currentEntry.updatedAt)}
+						{:else}
+							Your receipt stays private.
+						{/if}
+					</span>
+				{/key}
 			</div>
-			<a href="/history?view=week&date={activeDate}">Browse all</a>
 		</div>
-
-		{#if recentEntries.isLoading}
-			<p class="recent-copy">Loading recent receipts…</p>
-		{:else if recentEntries.error}
-			<p class="recent-copy error">{recentEntries.error.message}</p>
-		{:else}
-			<div class="recent-list">
-				{#each currentRecentEntries as entry (entry._id)}
-					<button type="button" class:selected={entry.entryDate === activeDate} class="recent-item" onclick={() => openHistory(entry.entryDate)}>
-						<span class="recent-item-date">{formatRelativeEntryDate(entry.entryDate)}</span>
-						<span class="recent-item-summary">{entry.summary}</span>
-					</button>
-				{/each}
-			</div>
-		{/if}
-	</section>
+	{:else}
+		<div class="capture-card capture-card--skeleton" aria-busy="true">
+			<div class="skeleton-line skeleton-line--wide"></div>
+			<div class="skeleton-line skeleton-line--narrow"></div>
+		</div>
+	{/if}
 </div>
 
 <style>
 .today-page {
+	max-width: 48rem;
+	margin: 0 auto;
+	padding: 0;
+}
+
+/* Header */
+.page-header {
+	padding: 2.5rem 0 1.75rem;
 	display: flex;
 	flex-direction: column;
-	gap: 1.5rem;
-	max-width: 52rem;
+	gap: 0.25rem;
 }
 
-.utility-row,
-.capture-block,
-.recent-block {
-	border-radius: 1.4rem;
-	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 94%, white 6%);
-}
-
-.utility-row {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 1rem;
-	padding: 1rem 1.15rem;
-	flex-wrap: wrap;
-}
-
-.utility-copy p,
-.utility-copy h1,
-.capture-copy h2,
-.capture-copy p,
-.status-row,
-.snapshot-label,
-.snapshot-summary,
-.snapshot-body,
-.recent-label,
-.recent-copy,
-.recent-item-date,
-.recent-item-summary {
-	margin: 0;
-}
-
-.eyebrow,
-.snapshot-label,
-.recent-label {
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.18em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
-
-.utility-copy h1,
-.capture-copy h2 {
+.page-title {
 	font-family: var(--font-display);
+	font-size: 2rem;
 	font-weight: 400;
 	color: var(--color-ink);
-	line-height: 1.06;
+	margin: 0;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
 }
 
-.utility-copy h1 {
-	font-size: 1.9rem;
-	margin-top: 0.2rem;
-}
-
-.utility-copy p:last-child,
-.capture-copy p,
-.status-row,
-.snapshot-body,
-.recent-copy {
+.date-label {
+	font-size: 0.875rem;
 	color: var(--color-muted);
-	line-height: 1.7;
+	margin: 0;
+	letter-spacing: 0.01em;
 }
 
-.utility-actions {
+/* Capture Card */
+.capture-card {
+	background: var(--color-surface);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-card);
+	box-shadow: var(--shadow-card);
+	padding: 1.75rem;
 	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	flex-wrap: wrap;
+	flex-direction: column;
+	gap: 1.25rem;
 }
 
-.utility-actions a,
-.recent-header a {
-	font-size: 0.84rem;
-	font-weight: 600;
+.card-header {
+	display: flex;
+	flex-direction: column;
+	gap: 0.375rem;
+}
+
+.card-title {
+	font-family: var(--font-display);
+	font-size: 1.25rem;
+	font-weight: 400;
 	color: var(--color-ink);
-	text-decoration: none;
+	margin: 0;
+	line-height: 1.3;
 }
 
-.utility-actions a:hover,
-.recent-header a:hover {
-	color: var(--color-brand-strong);
+.card-subtitle {
+	font-size: 0.875rem;
+	color: var(--color-muted);
+	margin: 0;
+	line-height: 1.6;
 }
 
-.privacy-pill {
-	display: inline-flex;
-	align-items: center;
-	padding: 0.4rem 0.72rem;
-	border-radius: 9999px;
-	background: color-mix(in srgb, var(--color-brand-soft) 68%, white 32%);
-	font-size: 0.78rem;
-	font-weight: 700;
-	color: var(--color-brand-strong);
-}
-
-.capture-block,
-.recent-block {
-	padding: 1.2rem;
-}
-
-.capture-copy {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	margin-bottom: 1rem;
-}
-
-.capture-copy h2 {
-	font-size: 2.2rem;
-	letter-spacing: -0.02em;
-}
-
-.status-row {
-	padding: 0.85rem 0.1rem 0;
-	font-size: 0.84rem;
-}
-
-.saved-snapshot {
-	display: flex;
-	flex-direction: column;
-	gap: 0.45rem;
-	padding-top: 1rem;
-	margin-top: 1rem;
+/* Status Bar */
+.status-bar {
+	padding-top: 0.75rem;
 	border-top: 1px solid var(--color-border);
 }
 
-.snapshot-summary {
-	font-size: 1.08rem;
-	font-weight: 600;
-	color: var(--color-ink);
-	line-height: 1.45;
+.status-text {
+	font-size: 0.75rem;
+	color: var(--color-muted);
 }
 
-.snapshot-body {
-	font-size: 0.95rem;
-	line-height: 1.75;
-	max-width: 44rem;
-	display: -webkit-box;
-	line-clamp: 3;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
+.status-text.error {
+	color: var(--color-error);
 }
 
-.recent-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-start;
-	gap: 1rem;
-	margin-bottom: 1rem;
-	flex-wrap: wrap;
-}
+/* Mobile */
+@media (max-width: 600px) {
+	.today-page {
+		padding: 0 0.25rem;
+	}
 
-.recent-list {
+	.page-header {
+		padding: 1.5rem 0 1.25rem;
+	}
+
+	.page-title {
+		font-size: 1.5rem;
+	}
+
+	.capture-card {
+		padding: 1.25rem;
+	}}
+
+.capture-card--skeleton {
+	min-height: 12rem;
 	display: flex;
 	flex-direction: column;
-	gap: 0.6rem;
+	justify-content: center;
+	gap: 0.75rem;
+	padding: 1.75rem;
 }
 
-.recent-item {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	padding: 0.9rem 0.95rem;
-	border-radius: 1rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-canvas);
-	text-align: left;
-	cursor: pointer;
-	transition:
-		border-color 0.15s ease,
-		transform 0.15s ease,
-		background-color 0.15s ease;
+.skeleton-line {
+	height: 0.875rem;
+	border-radius: var(--radius-sm);
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-border) 70%, transparent),
+		color-mix(in srgb, var(--color-border) 40%, transparent),
+		color-mix(in srgb, var(--color-border) 70%, transparent)
+	);
+	background-size: 200% 100%;
+	animation: shimmer 1.6s ease-in-out infinite;
 }
 
-.recent-item:hover,
-.recent-item.selected {
-	transform: translateY(-1px);
-	border-color: color-mix(in srgb, var(--color-brand) 35%, var(--color-border));
-	background: color-mix(in srgb, var(--color-brand-soft) 60%, white 40%);
-}
+.skeleton-line--wide  { width: 75%; }
+.skeleton-line--narrow { width: 45%; }
 
-.recent-item-date {
-	font-size: 0.78rem;
-	font-weight: 700;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
-
-.recent-item-summary {
-	font-size: 0.92rem;
-	font-weight: 500;
-	color: var(--color-ink);
-	line-height: 1.55;
-}
-
-.error {
-	color: #b91c1c;
-}
-
-@media (max-width: 720px) {
-	.capture-copy h2 {
-		font-size: 1.8rem;
-	}
-
-	.recent-item {
-		flex-direction: column;
-		align-items: flex-start;
-	}
+@keyframes shimmer {
+	0%   { background-position: 200% 0; }
+	100% { background-position: -200% 0; }
 }
 </style>

@@ -5,28 +5,49 @@
 	import { useClerkContext } from 'svelte-clerk';
 
 	import { convexAuthReady } from '$lib/auth/convexAuth';
-	import HistoryArchiveView from '$lib/components/HistoryArchiveView.svelte';
 	import HistoryMonthView from '$lib/components/HistoryMonthView.svelte';
+	import HistoryTimelineView from '$lib/components/HistoryTimelineView.svelte';
 	import HistoryWeekView from '$lib/components/HistoryWeekView.svelte';
 	import { api } from '$lib/convex';
+	import { getHistoryPreferences, resolveHistoryView } from '$lib/history/preferences';
 	import {
 		addMonths,
 		addDays,
 		formatMonthLabel,
+		formatWeekRangeLabel,
 		getMonthRange,
 		getTodayLocalDate,
 		getWeekRange,
 		listMonthGridDates,
+		listWeekdayLabels,
 		listWeekDates,
 	} from '$lib/utils/date';
 
 	const clerk = useClerkContext();
-	const view = $derived(($page.url.searchParams.get('view') as 'week' | 'month' | 'archive' | null) || 'week');
-	const activeDate = $derived($page.url.searchParams.get('date') || getTodayLocalDate());
-	const activeMonth = $derived($page.url.searchParams.get('month') || activeDate.slice(0, 7));
 	const ready = $derived(clerk.isLoaded && !!clerk.auth.userId && $convexAuthReady);
-	const weekRange = $derived(getWeekRange(activeDate));
-	const monthRange = $derived(getMonthRange(activeDate));
+	const settings = useQuery(api.users.settings, () => (ready ? {} : 'skip'));
+	const historyPreferences = $derived(
+		getHistoryPreferences({
+			weekStartsOn: settings.data?.weekStartsOn,
+			defaultHistoryView: settings.data?.defaultHistoryView,
+		}),
+	);
+	const preferredTimezone = $derived(settings.data?.timezone);
+	const view = $derived(
+		resolveHistoryView($page.url.searchParams.get('view'), historyPreferences.defaultHistoryView),
+	);
+	const activeDate = $derived(
+		$page.url.searchParams.get('date') || getTodayLocalDate(preferredTimezone),
+	);
+
+	// Stabilize to the first of the month to prevent same-month date clicks
+	// from re-firing the Convex query and remounting the component
+	const activeMonthStart = $derived(`${activeDate.slice(0, 7)}-01`);
+	const monthRange = $derived(getMonthRange(activeMonthStart));
+
+	const weekRange = $derived(getWeekRange(activeDate, historyPreferences.weekStartsOn));
+	const weekDates = $derived(listWeekDates(activeDate, historyPreferences.weekStartsOn));
+	const weekdayLabels = $derived(listWeekdayLabels(historyPreferences.weekStartsOn));
 
 	const weekEntries = useQuery(
 		api.logEntries.listByRange,
@@ -36,13 +57,20 @@
 		api.logEntries.listByRange,
 		() => (ready ? { startDate: monthRange.start, endDate: monthRange.end } : 'skip'),
 	);
-	const archiveMonths = useQuery(api.logEntries.listArchiveMonths, () => (ready ? {} : 'skip'));
-	const archiveEntries = useQuery(
-		api.logEntries.listByRange,
-		() =>
-			ready
-				? { startDate: `${activeMonth}-01`, endDate: getMonthRange(`${activeMonth}-01`).end }
-				: 'skip',
+	const timelineEntries = useQuery(api.logEntries.list, () => (ready ? {} : 'skip'));
+
+	const isLoading = $derived(
+		!ready ||
+		(view === 'week' && weekEntries.isLoading) ||
+		(view === 'month' && monthEntries.isLoading) ||
+		(view === 'timeline' && timelineEntries.isLoading) ||
+		settings.isLoading,
+	);
+
+	const hasError = $derived(
+		(view === 'week' && !!weekEntries.error) ||
+		(view === 'month' && !!monthEntries.error) ||
+		(view === 'timeline' && !!timelineEntries.error),
 	);
 
 	function updateSearch(params: Record<string, string>) {
@@ -54,8 +82,13 @@
 		void goto(`/history?${search.toString()}`, { keepFocus: true, noScroll: true });
 	}
 
-	function changeView(nextView: 'week' | 'month' | 'archive') {
-		updateSearch({ view: nextView });
+	function changeView(nextView: 'week' | 'month' | 'timeline') {
+		if (nextView === 'timeline') {
+			void goto('/history?view=timeline', { keepFocus: true, noScroll: true });
+			return;
+		}
+
+		updateSearch({ view: nextView, date: activeDate });
 	}
 
 	function shiftPeriod(direction: -1 | 1) {
@@ -66,170 +99,140 @@
 
 		if (view === 'month') {
 			updateSearch({ date: addMonths(activeDate, direction) });
-			return;
 		}
-
-		updateSearch({ month: addMonths(`${activeMonth}-01`, direction).slice(0, 7) });
 	}
 </script>
 
 <div class="history-page">
-	<div class="history-header">
-		<div>
-			<p class="eyebrow">History</p>
-			<h1 class="title">Browse your receipts without the endless feed.</h1>
-			<p class="desc">
-				Move through your work by week, month, or archive when you need review prep instead of raw scrolling.
-			</p>
-		</div>
+	<header class="history-header">
+		<span class="view-label">{view}</span>
 
-		<div class="header-controls">
-			<div class="view-switcher">
-				{#each ['week', 'month', 'archive'] as option}
-					<button type="button" class:selected={view === option} onclick={() => changeView(option as 'week' | 'month' | 'archive')}>
-						{option}
-					</button>
-				{/each}
-			</div>
-
+		{#if view !== 'timeline'}
 			<div class="period-nav">
-				<button type="button" onclick={() => shiftPeriod(-1)}>←</button>
-				<span>{view === 'archive' ? formatMonthLabel(`${activeMonth}-01`) : formatMonthLabel(activeDate)}</span>
-				<button type="button" onclick={() => shiftPeriod(1)}>→</button>
+				<button type="button" onclick={() => shiftPeriod(-1)} aria-label="Previous period">←</button>
+				<span class="period-label">
+					{view === 'week'
+						? formatWeekRangeLabel(activeDate, historyPreferences.weekStartsOn)
+						: formatMonthLabel(activeMonthStart)}
+				</span>
+				<button type="button" onclick={() => shiftPeriod(1)} aria-label="Next period">→</button>
 			</div>
-		</div>
-	</div>
+		{/if}
+	</header>
 
-	{#if !ready || weekEntries.isLoading || monthEntries.isLoading || archiveMonths.isLoading || archiveEntries.isLoading}
+	{#if isLoading}
 		<div class="status-card">Loading your history…</div>
-	{:else if weekEntries.error || monthEntries.error || archiveMonths.error || archiveEntries.error}
+	{:else if hasError}
 		<div class="error-card">Unable to load your history right now.</div>
 	{:else if view === 'week'}
 		<HistoryWeekView
-			weekDates={listWeekDates(activeDate)}
+			weekDates={weekDates}
 			entries={weekEntries.data ?? []}
 			selectedDate={activeDate}
+			timezone={preferredTimezone}
 			onSelectDate={(date) => updateSearch({ date })}
 		/>
 	{:else if view === 'month'}
 		<HistoryMonthView
-			entryDate={activeDate}
-			gridDates={listMonthGridDates(activeDate)}
+			entryDate={activeMonthStart}
+			gridDates={listMonthGridDates(activeMonthStart, historyPreferences.weekStartsOn)}
 			entries={monthEntries.data ?? []}
 			selectedDate={activeDate}
+			timezone={preferredTimezone}
+			weekdayLabels={weekdayLabels}
 			onSelectDate={(date) => updateSearch({ date })}
 		/>
-	{:else}
-		<HistoryArchiveView
-			months={archiveMonths.data ?? []}
-			entries={archiveEntries.data ?? []}
-			activeMonth={activeMonth}
-			onSelectMonth={(month) => updateSearch({ month })}
-		/>
+	{:else if view === 'timeline'}
+		<HistoryTimelineView entries={timelineEntries.data ?? []} timezone={preferredTimezone} />
 	{/if}
 </div>
 
 <style>
-.history-page {
-	display: flex;
-	flex-direction: column;
-	gap: 1.5rem;
-}
+	.history-page {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
 
-.history-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
-	gap: 1.5rem;
-	padding-bottom: 1.4rem;
-	border-bottom: 1px solid var(--color-border);
-	flex-wrap: wrap;
-}
+	.history-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		padding: 1rem 0;
+		border-bottom: 1px solid var(--color-border);
+		min-height: 3.5rem;
+	}
 
-.eyebrow {
-	margin: 0 0 0.4rem;
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.2em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
+	.view-label {
+		font-family: var(--font-body);
+		font-size: 1.25rem;
+		font-weight: 400;
+		color: var(--color-ink);
+		line-height: 1.3;
+		text-transform: capitalize;
+	}
 
-.title {
-	margin: 0;
-	font-family: var(--font-display);
-	font-size: 2.35rem;
-	font-weight: 400;
-	line-height: 1.08;
-	color: var(--color-ink);
-	max-width: 42rem;
-}
+	.period-nav {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.25rem;
+		border-radius: 9999px;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+	}
 
-.desc {
-	margin: 0.65rem 0 0;
-	max-width: 42rem;
-	font-size: 0.95rem;
-	line-height: 1.8;
-	color: var(--color-muted);
-}
+	.period-nav button {
+		padding: 0.4rem 0.6rem;
+		border: none;
+		border-radius: 9999px;
+		background: transparent;
+		font-family: var(--font-body);
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-muted);
+		cursor: pointer;
+		transition: background 0.15s ease, color 0.15s ease;
+	}
 
-.header-controls {
-	display: flex;
-	flex-direction: column;
-	gap: 0.8rem;
-	align-items: flex-end;
-}
+	.period-nav button:hover {
+		color: var(--color-ink);
+	}
 
-.view-switcher,
-.period-nav {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.35rem;
-	padding: 0.3rem;
-	border-radius: 9999px;
-	border: 1px solid var(--color-border);
-	background: var(--color-surface);
-}
+	.period-label {
+		padding: 0 0.5rem;
+		font-family: var(--font-body);
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-ink);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 12rem;
+	}
 
-.view-switcher button,
-.period-nav button {
-	padding: 0.5rem 0.85rem;
-	border: none;
-	border-radius: 9999px;
-	background: transparent;
-	font-size: 0.82rem;
-	font-weight: 600;
-	color: var(--color-muted);
-	cursor: pointer;
-	text-transform: capitalize;
-}
+	.status-card,
+	.error-card {
+		padding: 1.25rem 1.4rem;
+		border-radius: 1rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-surface);
+		font-size: 0.9rem;
+		color: var(--color-muted);
+	}
 
-.view-switcher button.selected,
-.period-nav button:hover {
-	background: var(--color-canvas);
-	color: var(--color-ink);
-}
+	.error-card {
+		border-color: #fecaca;
+		background: #fef2f2;
+		color: #b91c1c;
+	}
 
-.period-nav span {
-	padding: 0 0.4rem;
-	font-size: 0.82rem;
-	font-weight: 600;
-	color: var(--color-ink);
-}
-
-.status-card,
-.error-card {
-	padding: 1.25rem 1.4rem;
-	border-radius: 1rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-surface);
-	font-size: 0.9rem;
-	color: var(--color-muted);
-}
-
-.error-card {
-	border-color: #fecaca;
-	background: #fef2f2;
-	color: #b91c1c;
-}
+	@media (max-width: 640px) {
+		.history-header {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.75rem;
+		}
+	}
 </style>

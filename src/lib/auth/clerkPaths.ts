@@ -12,8 +12,8 @@ type PublicClerkEnv = {
 };
 
 export function resolveClerkPaths(env: PublicClerkEnv) {
-	const signInUrl = env.PUBLIC_CLERK_SIGN_IN_URL || '/sign-in';
-	const signUpUrl = env.PUBLIC_CLERK_SIGN_UP_URL || '/sign-up';
+	const signInUrl = env.PUBLIC_CLERK_SIGN_IN_URL || '/login';
+	const signUpUrl = env.PUBLIC_CLERK_SIGN_UP_URL || '/login';
 	const signInForceRedirectUrl =
 		env.PUBLIC_CLERK_SIGN_IN_FORCE_REDIRECT_URL ||
 		env.PUBLIC_CLERK_AFTER_SIGN_IN_URL ||

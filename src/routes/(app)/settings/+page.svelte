@@ -1,217 +1,484 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
+	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { useClerkContext } from 'svelte-clerk';
 
+	import { resolveClerkPaths } from '$lib/auth/clerkPaths';
+	import { convexAuthReady } from '$lib/auth/convexAuth';
+	import {
+		clearSignOutRedirectPending,
+		markSignOutRedirectPending,
+	} from '$lib/auth/signOutFlow';
+	import SettingField from '$lib/components/settings/SettingField.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { api } from '$lib/convex';
+	import {
+		getBrowserTimeZone,
+		historyViewOptions,
+		listTimezoneOptions,
+		weekStartOptions,
+	} from '$lib/settings/options';
+
 	const clerk = useClerkContext();
-	const signOutRedirectUrl = env.PUBLIC_CLERK_AFTER_SIGN_OUT_URL || '/';
+	const convex = useConvexClient();
+	const { signOutRedirectUrl } = resolveClerkPaths(env);
+	
 	const displayName = $derived(clerk.user?.fullName || clerk.user?.firstName || 'Your account');
 	const emailAddress = $derived(clerk.user?.primaryEmailAddress?.emailAddress || clerk.user?.emailAddresses?.[0]?.emailAddress || 'Signed in with Clerk');
+	const avatarUrl = $derived(clerk.user?.imageUrl || null);
+	const ready = $derived(clerk.isLoaded && !!clerk.auth.userId && $convexAuthReady);
+	const settings = useQuery(api.users.settings, () => (ready ? {} : 'skip'));
+
+	let timezone = $state(getBrowserTimeZone());
+	let weekStartsOn = $state<0 | 1 | 2 | 3 | 4 | 5 | 6>(1);
+	let defaultHistoryView = $state<'week' | 'month' | 'timeline'>('week');
+	let isSaving = $state(false);
+	let saveMessage = $state<string | null>(null);
+	let errorMessage = $state<string | null>(null);
+	let hydratedSignature = $state<string | null>(null);
+
+	const timezoneOptions = $derived(listTimezoneOptions(timezone));
+	const loadedSignature = $derived(
+		settings.data
+			? JSON.stringify([
+				settings.data.timezone,
+				settings.data.weekStartsOn,
+				settings.data.defaultHistoryView,
+			])
+			: null
+	);
+	const isDirty = $derived(
+		loadedSignature !== null &&
+			JSON.stringify([timezone, weekStartsOn, defaultHistoryView]) !== loadedSignature
+	);
+
+	$effect(() => {
+		if (!settings.data || loadedSignature === null || hydratedSignature === loadedSignature) {
+			return;
+		}
+
+		timezone = settings.data.timezone;
+		weekStartsOn = settings.data.weekStartsOn;
+		defaultHistoryView = settings.data.defaultHistoryView;
+		hydratedSignature = loadedSignature;
+		errorMessage = null;
+	});
+
+	$effect(() => {
+		if (!isDirty) {
+			return;
+		}
+		saveMessage = null;
+	});
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+
+		if (!ready || isSaving || !isDirty) {
+			return;
+		}
+
+		isSaving = true;
+		errorMessage = null;
+		saveMessage = null;
+
+		try {
+			await convex.mutation(api.users.updateSettings, {
+				timezone,
+				weekStartsOn,
+				defaultHistoryView,
+			});
+
+			saveMessage = 'Preferences saved';
+			hydratedSignature = JSON.stringify([timezone, weekStartsOn, defaultHistoryView]);
+		} catch (error) {
+			errorMessage = error instanceof Error ? error.message : 'Unable to save settings';
+		} finally {
+			isSaving = false;
+		}
+	}
+
+	function useDetectedTimezone() {
+		timezone = getBrowserTimeZone();
+		saveMessage = null;
+		errorMessage = null;
+	}
+
+	async function handleSignOut() {
+		if (!clerk.clerk) return;
+
+		try {
+			markSignOutRedirectPending();
+			await clerk.clerk.signOut();
+			await goto(signOutRedirectUrl, { replaceState: true });
+			clearSignOutRedirectPending();
+		} catch (error) {
+			clearSignOutRedirectPending();
+			throw error;
+		}
+	}
 </script>
 
 <div class="settings-page">
-	<div class="page-header">
-		<p class="eyebrow">Settings</p>
-		<h1 class="page-title">Account, plan, and private defaults.</h1>
-		<p class="page-desc">
-			Keep the settings surface quiet: enough control to trust the product, without turning it into admin work.
-		</p>
-	</div>
+	<header class="page-header">
+		<span class="eyebrow">Settings</span>
+		<h1 class="page-title">Your account</h1>
+	</header>
 
-	<div class="settings-grid">
-		<section class="settings-card feature">
-			<p class="card-label">Account</p>
-			<h2 class="card-title">The details tied to your private work log.</h2>
-			<div class="detail-list">
-				<div>
-					<span class="detail-label">Name</span>
-					<p>{displayName}</p>
+	<section class="card profile-card">
+		<div class="card-header">
+			<span class="eyebrow">Profile</span>
+			<h2 class="card-title">Account details</h2>
+		</div>
+		<div class="profile-content">
+			{#if avatarUrl}
+				<img src={avatarUrl} alt="" class="avatar" />
+			{:else}
+				<div class="avatar avatar-placeholder">
+					{displayName.charAt(0).toUpperCase()}
 				</div>
-				<div>
-					<span class="detail-label">Email</span>
-					<p>{emailAddress}</p>
-				</div>
-				<div>
-					<span class="detail-label">Auth</span>
-					<p>Managed through Clerk with your custom app shell on top.</p>
-				</div>
+			{/if}
+			<div class="profile-info">
+				<p class="profile-name">{displayName}</p>
+				<p class="profile-email">{emailAddress}</p>
 			</div>
-		</section>
+			<Button variant="secondary" onclick={handleSignOut}>
+				Sign out
+			</Button>
+		</div>
+	</section>
 
-		<section class="settings-card muted">
-			<p class="card-label">Plan & Billing</p>
-			<h2 class="card-title">Reserved for the subscription surface.</h2>
-			<p class="card-copy">
-				This section should eventually show plan status, usage, upgrade paths, and the Stripe customer portal.
-			</p>
-			<ul class="stub-list">
-				<li>Current plan</li>
-				<li>Report quota and history access</li>
-				<li>Manage subscription</li>
-			</ul>
-		</section>
+	<section class="card">
+		<div class="card-header">
+			<span class="eyebrow">Preferences</span>
+			<h2 class="card-title">App preferences</h2>
+		</div>
 
-		<section class="settings-card muted">
-			<p class="card-label">Privacy & Data</p>
-			<h2 class="card-title">Everything here should reinforce private-by-default trust.</h2>
-			<p class="card-copy">
-				Add export, delete-account controls, and a clear explanation of what is stored once those flows are ready.
-			</p>
-			<ul class="stub-list">
-				<li>Private-by-default summary</li>
-				<li>Export receipts</li>
-				<li>Delete account and data</li>
-			</ul>
-		</section>
+		{#if !ready || settings.isLoading}
+			<div class="status-message">Loading preferences…</div>
+		{:else if settings.error}
+			<div class="error-message">Unable to load settings</div>
+		{:else}
+			<form onsubmit={handleSubmit}>
+				<SettingField
+					forId="timezone"
+					label="Timezone"
+					description="Used for date boundaries and reporting"
+				>
+					<div class="select-with-action">
+						<select id="timezone" class="field-input" bind:value={timezone}>
+							{#each timezoneOptions as option}
+								<option value={option}>{option}</option>
+							{/each}
+						</select>
+						<Button variant="text" onclick={useDetectedTimezone}>
+							Use detected
+						</Button>
+					</div>
+				</SettingField>
 
-		<section class="settings-card muted">
-			<p class="card-label">Preferences</p>
-			<h2 class="card-title">Small defaults that reduce friction later.</h2>
-			<p class="card-copy">
-				Timezone, week start day, and future reporting defaults belong here instead of in the daily writing flow.
-			</p>
-			<ul class="stub-list">
-				<li>Timezone</li>
-				<li>Week start day</li>
-				<li>Default report range</li>
-			</ul>
-		</section>
+				<SettingField
+					forId="week-start"
+					label="Week starts on"
+					description="First day of the week in calendar views"
+				>
+					<select id="week-start" class="field-input" bind:value={weekStartsOn}>
+						{#each weekStartOptions as option}
+							<option value={option.value}>{option.label}</option>
+						{/each}
+					</select>
+				</SettingField>
 
-		<section class="settings-card feature">
-			<p class="card-label">Session</p>
-			<h2 class="card-title">Leaving the workspace takes you back to the public home page.</h2>
-			<p class="card-copy">Current sign-out redirect: <code>{signOutRedirectUrl}</code></p>
-			<p class="card-copy">
-				This keeps logout feeling like “leave the app” instead of “restart auth.”
-			</p>
-		</section>
+				<SettingField
+					forId="history-view"
+					label="Default history view"
+					description="Opens when navigating to history"
+				>
+					<select id="history-view" class="field-input" bind:value={defaultHistoryView}>
+						{#each historyViewOptions as option}
+							<option value={option.value}>{option.label}</option>
+						{/each}
+					</select>
+				</SettingField>
 
-		<section class="settings-card muted">
-			<p class="card-label">Help</p>
-			<h2 class="card-title">A home for support, changelog, and policies.</h2>
-			<ul class="stub-list">
-				<li><a href="/changelog">Product changelog</a></li>
-				<li><a href="https://github.com/abijith-suresh/receipts">Project repository</a></li>
-				<li>Privacy policy and terms</li>
-			</ul>
-		</section>
-	</div>
+				<div class="form-footer">
+					<div class="save-status" aria-live="polite">
+						{#if errorMessage}
+							<span class="status-error">{errorMessage}</span>
+						{:else if saveMessage}
+							<span class="status-success">{saveMessage}</span>
+						{:else if isDirty}
+							<span class="status-pending">Unsaved changes</span>
+						{/if}
+					</div>
+					<Button type="submit" disabled={!isDirty || isSaving}>
+						{isSaving ? 'Saving…' : 'Save preferences'}
+					</Button>
+				</div>
+			</form>
+		{/if}
+	</section>
+
+	<section class="card placeholder-card">
+		<div class="card-header">
+			<span class="eyebrow">Plan & Billing</span>
+			<h2 class="card-title">Subscription</h2>
+		</div>
+		<p class="placeholder-text">Subscription management coming soon</p>
+	</section>
+
+	<section class="card placeholder-card">
+		<div class="card-header">
+			<span class="eyebrow">Privacy & Data</span>
+			<h2 class="card-title">Your data</h2>
+		</div>
+		<p class="placeholder-text">Data export and account deletion coming soon</p>
+	</section>
+
+	<section class="card minimal-card">
+		<div class="card-header">
+			<span class="eyebrow">Help</span>
+			<h2 class="card-title">Resources</h2>
+		</div>
+		<nav class="help-links">
+			<a href="/changelog">Changelog</a>
+			<a href="https://github.com/abijith-suresh/receipts" target="_blank" rel="noopener">GitHub</a>
+			<a href="/privacy">Privacy policy</a>
+		</nav>
+	</section>
 </div>
 
 <style>
-.settings-page {
-	display: flex;
-	flex-direction: column;
-	gap: 1.5rem;
-	max-width: 62rem;
-}
+	.settings-page {
+		max-width: 52rem;
+		margin: 0 auto;
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		padding: 0 1rem;
+	}
 
-.page-header {
-	display: flex;
-	flex-direction: column;
-	gap: 0.55rem;
-	padding-bottom: 1.5rem;
-	border-bottom: 1px solid var(--color-border);
-}
+	.page-header {
+		margin-bottom: 0.5rem;
+	}
 
-.eyebrow,
-.card-label,
-.detail-label {
-	margin: 0;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.18em;
-	text-transform: uppercase;
-	color: var(--color-brand-strong);
-}
-
-.page-title,
-.card-title {
-	margin: 0;
-	font-family: var(--font-display);
-	font-weight: 400;
-	line-height: 1.08;
-	color: var(--color-ink);
-}
-
-.page-title {
-	font-size: 2.45rem;
-	max-width: 44rem;
-}
-
-.page-desc,
-.card-copy,
-.detail-list p,
-.stub-list,
-.stub-list a {
-	margin: 0;
-	font-size: 0.94rem;
-	line-height: 1.75;
-	color: var(--color-muted);
-}
-
-.settings-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 1rem;
-}
-
-.settings-card {
-	display: flex;
-	flex-direction: column;
-	gap: 0.8rem;
-	padding: 1.35rem;
-	border-radius: 1.25rem;
-	border: 1px solid var(--color-border);
-	background: color-mix(in srgb, var(--color-surface) 93%, white 7%);
-}
-
-.settings-card.feature {
-	background: color-mix(in srgb, var(--color-canvas) 88%, white 12%);
-}
-
-.detail-list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.85rem;
-}
-
-.detail-list div {
-	display: flex;
-	flex-direction: column;
-	gap: 0.2rem;
-}
-
-.stub-list {
-	padding-left: 1.1rem;
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-}
-
-.stub-list a {
-	text-decoration: none;
-	color: var(--color-ink);
-}
-
-.stub-list a:hover {
-	color: var(--color-brand-strong);
-}
-
-code {
-	padding: 0.12rem 0.35rem;
-	border-radius: 0.35rem;
-	background: var(--color-canvas);
-	font-size: 0.82rem;
-	color: var(--color-ink);
-}
-
-@media (max-width: 960px) {
-	.settings-grid {
-		grid-template-columns: 1fr;
+	.eyebrow {
+		display: block;
+		font-size: var(--font-size-eyebrow);
+		font-weight: 600;
+		letter-spacing: var(--letter-spacing-eyebrow);
+		text-transform: uppercase;
+		color: var(--color-brand);
+		margin-bottom: 0.5rem;
 	}
 
 	.page-title {
+		font-family: var(--font-display);
 		font-size: 2rem;
+		font-weight: 400;
+		color: var(--color-ink);
+		margin: 0;
+		line-height: 1.1;
 	}
-}
+
+	.card {
+		background: color-mix(in srgb, var(--color-surface) 96%, var(--color-canvas) 4%);
+		border: 1px solid var(--color-border);
+		border-radius: 1.25rem;
+		padding: 1.5rem;
+	}
+
+	.card-header {
+		margin-bottom: 1.25rem;
+		padding-bottom: 0.25rem;
+	}
+
+	.card-title {
+		font-family: var(--font-display);
+		font-size: 1.25rem;
+		font-weight: 400;
+		color: var(--color-ink);
+		margin: 0;
+		line-height: 1.2;
+	}
+
+	.profile-card {
+		background: color-mix(in srgb, var(--color-canvas) 95%, var(--color-brand-soft) 5%);
+	}
+
+	.profile-content {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		padding: 0.25rem 0;
+	}
+
+	.avatar {
+		width: 3.5rem;
+		height: 3.5rem;
+		border-radius: 50%;
+		object-fit: cover;
+		background: var(--color-brand-soft);
+		border: 2px solid var(--color-border);
+	}
+
+	.avatar-placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--font-display);
+		font-size: 1.5rem;
+		font-weight: 400;
+		color: var(--color-brand-strong);
+	}
+
+	.profile-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.profile-name {
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-ink);
+		margin: 0 0 0.25rem 0;
+		line-height: 1.4;
+		overflow-wrap: break-word;
+	}
+
+	.profile-email {
+		font-size: 0.875rem;
+		color: var(--color-muted);
+		margin: 0;
+		line-height: 1.4;
+		overflow-wrap: break-word;
+	}
+
+	.select-with-action {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.field-input {
+		width: 100%;
+		padding: 0.7rem 0.9rem;
+		border-radius: 0.875rem;
+		border: 1px solid var(--color-border);
+		background: var(--color-canvas);
+		color: var(--color-ink);
+		font-size: 0.9375rem;
+		outline: none;
+		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	.field-input:focus {
+		border-color: var(--color-brand);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 12%, transparent);
+	}
+
+	.form-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 1.25rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+		flex-wrap: wrap;
+	}
+
+	.save-status {
+		font-size: 0.875rem;
+		min-height: 1.5rem;
+	}
+
+	.status-success {
+		color: #166534;
+	}
+
+	.status-error {
+		color: #b91c1c;
+	}
+
+	.status-pending {
+		color: var(--color-muted);
+	}
+
+	.status-message,
+	.error-message {
+		padding: 1rem;
+		border-radius: 0.875rem;
+		font-size: 0.9375rem;
+		background: var(--color-canvas);
+		border: 1px solid var(--color-border);
+	}
+
+	.error-message {
+		background: #fef2f2;
+		border-color: #fecaca;
+		color: #b91c1c;
+	}
+
+	.placeholder-card {
+		background: color-mix(in srgb, var(--color-canvas) 92%, var(--color-surface) 8%);
+	}
+
+	.placeholder-text {
+		font-size: 0.9375rem;
+		color: var(--color-muted);
+		margin: 0;
+	}
+
+	.minimal-card {
+		background: transparent;
+		border-style: dashed;
+	}
+
+	.help-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1.25rem;
+	}
+
+	.help-links a {
+		font-size: 0.9375rem;
+		color: var(--color-ink);
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.help-links a:hover {
+		color: var(--color-brand-strong);
+		text-decoration: underline;
+		text-underline-offset: 0.2em;
+	}
+
+	@media (max-width: 640px) {
+		.settings-page {
+			gap: 1.25rem;
+			padding: 0 0.75rem;
+		}
+
+		.page-title {
+			font-size: 1.75rem;
+		}
+
+		.card {
+			padding: 1.25rem;
+		}
+
+		.profile-content {
+			flex-direction: column;
+			align-items: flex-start;
+			text-align: left;
+		}
+
+		.form-footer {
+			flex-direction: column;
+			align-items: stretch;
+		}
+	}
 </style>
