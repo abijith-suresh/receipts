@@ -10,14 +10,6 @@
 	import TodaySummaryCard from '$lib/components/today/TodaySummaryCard.svelte';
 	import { api, type TodayState } from '$lib/convex';
 	import {
-		getTodayCanSynthesize,
-		getTodayExperienceState,
-		getTodayIsDirty,
-		getTodayLastUpdatedAt,
-		getTodayNotes,
-		getTodaySummary,
-	} from '$lib/today';
-	import {
 		formatDateTime,
 		formatEntryDate,
 		formatRelativeEntryDate,
@@ -42,12 +34,21 @@
 	const todayState = $derived(
 		(todayStateQuery.data as TodayState | null | undefined) ?? null,
 	);
-	const notes = $derived(getTodayNotes(todayState));
-	const summary = $derived(getTodaySummary(todayState));
-	const pageState = $derived(getTodayExperienceState(todayState));
-	const isDirty = $derived(getTodayIsDirty(todayState));
-	const canSynthesize = $derived(getTodayCanSynthesize(todayState));
-	const lastUpdatedAt = $derived(getTodayLastUpdatedAt(todayState));
+	const notes = $derived(
+		[...(todayState?.dayNotes ?? [])].sort(
+			(left, right) => right.createdAt - left.createdAt,
+		),
+	);
+	const summary = $derived(todayState?.logEntry ?? null);
+	const pageState = $derived(todayState?.state ?? 'empty');
+	const isDirty = $derived(todayState?.dirtyPrompt?.isDirty ?? false);
+	const canSynthesize = $derived((todayState?.noteCount ?? 0) > 0);
+	const lastUpdatedAt = $derived(
+		Math.max(
+			todayState?.dirtyPrompt?.latestUpdatedAt ?? 0,
+			summary?.updatedAt ?? 0,
+		) || null,
+	);
 
 	function showFlash(message: string) {
 		flashMessage = message;
@@ -88,7 +89,7 @@
 		isSynthesizing = true;
 
 		try {
-			await convex.action(api.dayCapture.triggerSynthesis, {
+			await convex.action(api.dayCaptureActions.synthesizeDayCapture, {
 				entryDate: resolvedActiveDate,
 			});
 			showFlash('Day summary generated');

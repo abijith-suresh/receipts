@@ -2,11 +2,13 @@
 
 import { v } from 'convex/values';
 import { internal } from './_generated/api';
-import type { Id } from './_generated/dataModel';
 import { action } from './_generated/server';
 
 import { getCurrentUserInfo } from './lib/auth';
-import { normalizeEntryDate } from './lib/dayCapture';
+import {
+	type DayCaptureSynthesisContext,
+	normalizeEntryDate,
+} from './lib/dayCapture';
 import {
 	buildSynthesisPrompt,
 	extractTextFromAnthropicResponse,
@@ -26,25 +28,13 @@ export const synthesizeDayCapture = action({
 	): Promise<{ entryDate: string; noteCount: number }> => {
 		const { clerkId } = await getCurrentUserInfo(ctx);
 		const entryDate = normalizeEntryDate(args.entryDate);
-		const synthesisContext: {
-			clerkId: string;
-			entryDate: string;
-			noteCount: number;
-			rawInput: string;
-			mode: 'single' | 'multi';
-			dayNotes: Array<{
-				_id: Id<'dayNotes'>;
-				clerkId: string;
-				entryDate: string;
-				content: string;
-				createdAt: number;
-				isArchived: boolean;
-			}>;
-			activeNoteIds: Id<'dayNotes'>[];
-		} = await ctx.runQuery(internal.dayCapture.loadSynthesisContext, {
-			clerkId,
-			entryDate,
-		});
+		const synthesisContext: DayCaptureSynthesisContext = await ctx.runQuery(
+			internal.dayCapture.loadSynthesisContext,
+			{
+				clerkId,
+				entryDate,
+			},
+		);
 
 		if (synthesisContext.noteCount === 0) {
 			throw new Error('Add at least one note before generating a summary.');

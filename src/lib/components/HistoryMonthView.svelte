@@ -91,8 +91,8 @@
 					</div>
 				{:else}
 					<div class="selected-empty">
-						<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
-						<a href="/dashboard" class="add-link">Add entry</a>
+						<p>No day summary for {formatEntryDateCompact(selectedDate)}</p>
+						<a href="/dashboard" class="add-link">Open Today</a>
 					</div>
 				{/if}
 			</div>

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { TodayNote } from '$lib/convex';
-	import { getTodayNoteText, getTodayNoteUpdatedAt } from '$lib/today';
 	import { formatDateTime } from '$lib/utils/date';
 
 	let { notes }: { notes: TodayNote[] } = $props();
@@ -19,7 +18,7 @@
 		<div class="notes-empty">
 			<p class="notes-empty-title">No notes yet.</p>
 			<p class="notes-empty-copy">
-				Start typing quick fragments as your day unfolds, then summarize later.
+				Capture the first note for today. You can generate the day summary once at least one note is here.
 			</p>
 		</div>
 	{:else}
@@ -27,9 +26,9 @@
 			{#each notes as note (note._id)}
 				<article class="note-item">
 					<div class="note-meta">
-						<span class="note-time">{formatDateTime(getTodayNoteUpdatedAt(note))}</span>
+						<span class="note-time">{formatDateTime(note.createdAt)}</span>
 					</div>
-					<p class="note-body">{getTodayNoteText(note)}</p>
+					<p class="note-body">{note.content}</p>
 				</article>
 			{/each}
 		</div>

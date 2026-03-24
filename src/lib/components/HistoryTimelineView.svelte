@@ -34,8 +34,8 @@
 <section class="timeline-view">
 	{#if entries.length === 0}
 		<div class="empty-state">
-			<p class="empty-message">No receipts yet.</p>
-			<a href="/dashboard" class="empty-link">Start with Today</a>
+			<p class="empty-message">No day summaries yet.</p>
+			<a href="/dashboard" class="empty-link">Open Today</a>
 		</div>
 	{:else}
 		{#each groupedByMonth as group}

@@ -1,15 +1,10 @@
 import { v } from 'convex/values';
 
-export const MIN_ENTRY_LENGTH = 10;
+import type { Doc, Id } from '../_generated/dataModel';
+
 export const MIN_DAY_NOTE_LENGTH = 3;
 export const MAX_DAY_NOTE_LENGTH = 600;
 export const MAX_DAY_NOTES_PER_DAY = 50;
-
-export const sourceTypeValidator = v.union(
-	v.literal('manual'),
-	v.literal('single_note_synthesis'),
-	v.literal('multi_note_synthesis'),
-);
 
 export const structuredSynthesisValidator = v.object({
 	summary: v.string(),
@@ -20,11 +15,6 @@ export const structuredSynthesisValidator = v.object({
 	tags: v.array(v.string()),
 });
 
-export type SourceType =
-	| 'manual'
-	| 'single_note_synthesis'
-	| 'multi_note_synthesis';
-
 export type StructuredSynthesis = {
 	summary: string;
 	tasksCompleted: string[];
@@ -32,6 +22,21 @@ export type StructuredSynthesis = {
 	impact: string | null;
 	blockers: string | null;
 	tags: string[];
+};
+
+export type SynthesisMode = 'single' | 'multi';
+
+export type DayNoteRecord = Doc<'dayNotes'>;
+
+export type DayCaptureSynthesisContext = {
+	clerkId: string;
+	entryDate: string;
+	noteCount: number;
+	rawInput: string;
+	mode: SynthesisMode;
+	dayNotes: DayNoteRecord[];
+	activeNoteIds: Id<'dayNotes'>[];
+	dirtyPromptDigest: string | null;
 };
 
 export type DayNoteLike = {
@@ -86,15 +91,25 @@ export function getDayNotesSnapshot(notes: DayNoteLike[]) {
 	const sortedNotes = [...notes].sort(
 		(left, right) => left.createdAt - right.createdAt,
 	);
+	const noteCount = sortedNotes.length;
 	const latestCreatedAt = sortedNotes.reduce(
 		(latest, note) => Math.max(latest, note.createdAt),
 		0,
 	);
 
 	return {
-		noteCount: sortedNotes.length,
+		noteCount,
 		latestCreatedAt,
+		dirtyPromptDigest: buildDirtyPromptDigest(noteCount, latestCreatedAt),
 		rawInput: buildCombinedRawInput(sortedNotes),
 		sortedNotes,
 	};
+}
+
+function buildDirtyPromptDigest(noteCount: number, latestCreatedAt: number) {
+	if (noteCount === 0 || latestCreatedAt === 0) {
+		return null;
+	}
+
+	return `${noteCount}:${latestCreatedAt}`;
 }

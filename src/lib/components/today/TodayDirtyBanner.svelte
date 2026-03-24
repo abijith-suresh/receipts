@@ -19,9 +19,9 @@
 {#if visible}
 	<section class="dirty-banner" aria-live="polite">
 		<div>
-			<p class="dirty-eyebrow">Summary may be outdated</p>
+			<p class="dirty-eyebrow">New notes since last summary</p>
 			<p class="dirty-copy">
-				Your summary may be outdated. Re-generate?
+				You added more notes after the last synthesis. Generate an updated day summary when you are ready.
 			</p>
 		</div>
 		<div class="dirty-actions">
@@ -29,7 +29,7 @@
 				{isDismissing ? 'Dismissing…' : 'Dismiss'}
 			</Button>
 			<Button variant="secondary" onclick={() => onSynthesize?.()} disabled={isSynthesizing}>
-				{isSynthesizing ? 'Re-generating…' : 'Re-generate'}
+				{isSynthesizing ? 'Updating…' : 'Update summary'}
 			</Button>
 		</div>
 	</section>

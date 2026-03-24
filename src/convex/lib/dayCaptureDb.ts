@@ -50,13 +50,15 @@ export async function getDayNotesByDate(
 
 export function buildDirtyPromptState(
 	entry: Doc<'logEntries'> | null,
-	hasActiveNotes: boolean,
+	digest: string | null,
 ) {
-	const isDirty = Boolean(entry?.isDirty && hasActiveNotes);
+	const isDirty = Boolean(entry?.isDirty && digest);
+	const dismissedForCurrentDigest =
+		!digest || entry?.dirtyPromptDismissedDigest === digest;
 
 	return {
 		isDirty,
-		dismissedForCurrentDigest: !isDirty,
-		shouldPrompt: isDirty,
+		dismissedForCurrentDigest,
+		shouldPrompt: isDirty && !dismissedForCurrentDigest,
 	};
 }

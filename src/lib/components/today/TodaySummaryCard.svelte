@@ -33,11 +33,11 @@
 			{#if isSynthesizing}
 				Synthesizing…
 			{:else if summary && isDirty}
-				Re-generate
+				Update summary
 			{:else if summary}
-				Summarize again
+				Generate again
 			{:else}
-				Summarize my day
+				Generate summary
 			{/if}
 		</Button>
 	</div>
@@ -66,12 +66,12 @@
 		<div class="summary-empty">
 			<p class="summary-empty-title">No summary yet.</p>
 			<p class="summary-empty-copy">
-				Once you have a few notes, generate a clean day-level summary for your timeline.
+				As soon as you have a note, generate the day summary that will appear in history.
 			</p>
 			{#if canSynthesize}
 				<div class="summary-empty-actions">
 					<Button onclick={() => onSynthesize?.()} disabled={isSynthesizing}>
-						{isSynthesizing ? 'Synthesizing…' : 'Finalize & close day'}
+						{isSynthesizing ? 'Synthesizing…' : 'Generate day summary'}
 					</Button>
 				</div>
 			{/if}

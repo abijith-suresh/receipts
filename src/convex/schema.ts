@@ -37,6 +37,7 @@ export default defineSchema({
 		blockers: v.optional(v.union(v.string(), v.null())),
 		tags: v.optional(v.array(v.string())),
 		isDirty: v.boolean(),
+		dirtyPromptDismissedDigest: v.optional(v.union(v.string(), v.null())),
 		lastSynthesizedAt: v.optional(v.number()),
 		noteCount: v.optional(v.number()),
 		createdAt: v.number(),

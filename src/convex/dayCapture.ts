@@ -9,8 +9,10 @@ import {
 import { getCurrentUserInfo } from './lib/auth';
 import {
 	assertValidDayNoteBody,
+	type DayCaptureSynthesisContext,
 	deriveSummary,
 	getDayNotesSnapshot,
+	MAX_DAY_NOTES_PER_DAY,
 	normalizeDayNoteBody,
 	normalizeEntryDate,
 	type StructuredSynthesis,
@@ -21,8 +23,6 @@ import {
 	getDayNotesByDate,
 	getLogEntryByDate,
 } from './lib/dayCaptureDb';
-
-const MAX_DAY_NOTES_PER_DAY = 50;
 
 export const addDayNote = mutation({
 	args: {
@@ -65,6 +65,7 @@ export const addDayNote = mutation({
 		if (logEntry) {
 			await ctx.db.patch(logEntry._id, {
 				isDirty: true,
+				dirtyPromptDismissedDigest: null,
 				updatedAt: now,
 			});
 		}
@@ -102,7 +103,10 @@ export const getTodayState = query({
 			getLogEntryByDate(ctx, clerkId, entryDate),
 		]);
 		const snapshot = getDayNotesSnapshot(dayNotes);
-		const dirtyPrompt = buildDirtyPromptState(logEntry, snapshot.noteCount > 0);
+		const dirtyPrompt = buildDirtyPromptState(
+			logEntry,
+			snapshot.dirtyPromptDigest,
+		);
 		const state =
 			!logEntry && snapshot.noteCount === 0
 				? 'empty'
@@ -121,7 +125,7 @@ export const getTodayState = query({
 				isDirty: dirtyPrompt.isDirty,
 				isDismissed: dirtyPrompt.dismissedForCurrentDigest,
 				shouldPrompt: dirtyPrompt.shouldPrompt,
-				digest: null,
+				digest: snapshot.dirtyPromptDigest,
 				latestUpdatedAt: snapshot.latestCreatedAt,
 			},
 		};
@@ -142,7 +146,15 @@ export const dismissDirtyPrompt = mutation({
 		}
 
 		await ctx.db.patch(logEntry._id, {
-			isDirty: false,
+			dirtyPromptDismissedDigest: getDayNotesSnapshot(
+				await getDayNotesByDate(
+					ctx,
+					clerkId,
+					entryDate,
+					false,
+					MAX_DAY_NOTES_PER_DAY,
+				),
+			).dirtyPromptDigest,
 		});
 
 		return null;
@@ -154,7 +166,7 @@ export const loadSynthesisContext = internalQuery({
 		clerkId: v.string(),
 		entryDate: v.string(),
 	},
-	handler: async (ctx, args) => {
+	handler: async (ctx, args): Promise<DayCaptureSynthesisContext> => {
 		const entryDate = normalizeEntryDate(args.entryDate);
 		const dayNotes = await getDayNotesByDate(
 			ctx,
@@ -175,6 +187,7 @@ export const loadSynthesisContext = internalQuery({
 			activeNoteIds: dayNotes
 				.filter((note) => !note.isArchived)
 				.map((note) => note._id),
+			dirtyPromptDigest: snapshot.dirtyPromptDigest,
 		};
 	},
 });
@@ -234,6 +247,7 @@ function toLogEntryPayload(args: {
 		blockers: args.structuredData.blockers,
 		tags: args.structuredData.tags,
 		isDirty: false,
+		dirtyPromptDismissedDigest: null,
 		lastSynthesizedAt: args.now,
 		noteCount: args.noteCount,
 		createdAt: args.createdAt,
