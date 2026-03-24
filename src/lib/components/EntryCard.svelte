@@ -1,5 +1,6 @@
 <script lang="ts">
 import type { LogEntry } from '$lib/convex';
+import { getDaySummaryBody } from '$lib/today';
 import { formatDateTime, formatEntryDate } from '$lib/utils/date';
 
 const { entry, variant = 'default' } = $props<{ entry: LogEntry; variant?: 'default' | 'today' | 'history' }>();
@@ -13,7 +14,17 @@ const { entry, variant = 'default' } = $props<{ entry: LogEntry; variant?: 'defa
 
 	<h3 class="card-summary">{entry.summary}</h3>
 
-	<p class="card-body">{entry.rawInput}</p>
+	{#if entry.tags?.length}
+		<div class="card-tags">
+			{#each entry.tags as tag}
+				<span class="card-tag">{tag}</span>
+			{/each}
+		</div>
+	{/if}
+
+	{#if getDaySummaryBody(entry)}
+		<p class="card-body">{getDaySummaryBody(entry)}</p>
+	{/if}
 </article>
 
 <style>
@@ -60,6 +71,23 @@ const { entry, variant = 'default' } = $props<{ entry: LogEntry; variant?: 'defa
 	color: var(--color-ink);
 	margin: 0;
 	line-height: 1.35;
+}
+
+.card-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.card-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.25rem 0.55rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--color-brand-soft) 85%, white);
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--color-brand-strong);
 }
 
 .card-body {

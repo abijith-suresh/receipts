@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { LogEntry } from '$lib/convex';
+	import { getDaySummaryBody } from '$lib/today';
 	import { formatEntryDateCompact } from '$lib/utils/date';
 
 	let {
@@ -33,8 +34,8 @@
 <section class="timeline-view">
 	{#if entries.length === 0}
 		<div class="empty-state">
-			<p class="empty-message">No receipts yet.</p>
-			<a href="/dashboard" class="empty-link">Start with Today</a>
+			<p class="empty-message">No day summaries yet.</p>
+			<a href="/dashboard" class="empty-link">Open Today</a>
 		</div>
 	{:else}
 		{#each groupedByMonth as group}
@@ -51,7 +52,16 @@
 							</div>
 							<div class="entry-content">
 								<p class="entry-summary">{entry.summary}</p>
-								<p class="entry-body">{entry.rawInput}</p>
+								{#if entry.tags?.length}
+									<div class="entry-tags">
+										{#each entry.tags as tag}
+											<span class="entry-tag">{tag}</span>
+										{/each}
+									</div>
+								{/if}
+								{#if getDaySummaryBody(entry)}
+									<p class="entry-body">{getDaySummaryBody(entry)}</p>
+								{/if}
 							</div>
 						</article>
 					{/each}
@@ -190,6 +200,23 @@
 	-webkit-box-orient: vertical;
 	box-orient: vertical;
 	overflow: hidden;
+}
+
+.entry-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.entry-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.2rem 0.48rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--color-brand-soft) 84%, white);
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--color-brand-strong);
 }
 
 .entry-body {

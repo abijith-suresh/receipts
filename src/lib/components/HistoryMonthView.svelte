@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { LogEntry } from '$lib/convex';
+	import { getDaySummaryBody } from '$lib/today';
 	import { formatEntryDateCompact, formatMonthLabel, formatRelativeEntryDate } from '$lib/utils/date';
 	import { fade } from 'svelte/transition';
 
@@ -77,12 +78,21 @@
 				{#if selectedEntry}
 					<div class="selected-entry">
 						<p class="entry-summary">{selectedEntry.summary}</p>
-						<p class="entry-body">{selectedEntry.rawInput}</p>
+						{#if selectedEntry.tags?.length}
+							<div class="entry-tags">
+								{#each selectedEntry.tags as tag}
+									<span class="entry-tag">{tag}</span>
+								{/each}
+							</div>
+						{/if}
+						{#if getDaySummaryBody(selectedEntry)}
+							<p class="entry-body">{getDaySummaryBody(selectedEntry)}</p>
+						{/if}
 					</div>
 				{:else}
 					<div class="selected-empty">
-						<p>No receipt for {formatEntryDateCompact(selectedDate)}</p>
-						<a href="/dashboard" class="add-link">Add entry</a>
+						<p>No day summary for {formatEntryDateCompact(selectedDate)}</p>
+						<a href="/dashboard" class="add-link">Open Today</a>
 					</div>
 				{/if}
 			</div>
@@ -234,6 +244,23 @@
 	-webkit-box-orient: vertical;
 	box-orient: vertical;
 	overflow: hidden;
+}
+
+.entry-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.entry-tag {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.22rem 0.5rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--color-brand-soft) 84%, white);
+	font-size: 0.72rem;
+	font-weight: 600;
+	color: var(--color-brand-strong);
 }
 
 .entry-body {

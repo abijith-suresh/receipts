@@ -31,9 +31,38 @@ export default defineSchema({
 		entryDate: v.string(),
 		rawInput: v.string(),
 		summary: v.string(),
+		tasksCompleted: v.optional(v.array(v.string())),
+		skillsDemonstrated: v.optional(v.array(v.string())),
+		impact: v.optional(v.union(v.string(), v.null())),
+		blockers: v.optional(v.union(v.string(), v.null())),
+		tags: v.optional(v.array(v.string())),
+		isDirty: v.boolean(),
+		dirtyPromptDismissedDigest: v.optional(v.union(v.string(), v.null())),
+		lastSynthesizedAt: v.optional(v.number()),
+		noteCount: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
 	})
 		.index('by_clerk_id', ['clerkId'])
-		.index('by_clerk_id_entry_date', ['clerkId', 'entryDate']),
+		.index('by_clerk_id_and_entry_date', ['clerkId', 'entryDate']),
+
+	dayNotes: defineTable({
+		clerkId: v.string(),
+		entryDate: v.string(),
+		content: v.string(),
+		createdAt: v.number(),
+		isArchived: v.boolean(),
+	})
+		.index('by_clerk_id', ['clerkId'])
+		.index('by_clerk_id_and_entry_date_and_created_at', [
+			'clerkId',
+			'entryDate',
+			'createdAt',
+		])
+		.index('by_clerk_id_and_entry_date_and_is_archived_and_created_at', [
+			'clerkId',
+			'entryDate',
+			'isArchived',
+			'createdAt',
+		]),
 });

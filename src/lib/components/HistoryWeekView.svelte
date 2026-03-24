@@ -70,9 +70,9 @@
 				<span class="day-date">{formatEntryDateCompact(date)}</span>
 				<span class="day-count">
 					{#if getEntriesForDate(date).length}
-						{getEntriesForDate(date).length} receipt{getEntriesForDate(date).length === 1 ? '' : 's'}
+						{getEntriesForDate(date).length} summar{getEntriesForDate(date).length === 1 ? 'y' : 'ies'}
 					{:else}
-						No receipt
+						No summary
 					{/if}
 				</span>
 			</button>
@@ -94,8 +94,8 @@
 				</div>
 			{:else}
 				<div class="empty-state">
-					<p>No receipt saved for this day yet.</p>
-					<p class="empty-hint">Keep the date selected as an anchor for backfilling when you need the record later.</p>
+					<p>No day summary for this date.</p>
+					<p class="empty-hint">Day summaries only appear after you capture notes in Today and run synthesis for that day.</p>
 				</div>
 			{/if}
 		</div>

@@ -1,20 +1,9 @@
 import { v } from 'convex/values';
+import { query } from './_generated/server';
 
-import { mutation, query } from './_generated/server';
 import { getCurrentUserInfo } from './lib/auth';
-
-const MIN_ENTRY_LENGTH = 10;
-
-function deriveSummary(rawInput: string) {
-	const cleaned = rawInput.trim().replace(/\s+/g, ' ');
-	const [firstSentence] = cleaned.split(/(?<=[.!?])\s+/);
-
-	if (firstSentence && firstSentence.length <= 140) {
-		return firstSentence;
-	}
-
-	return `${cleaned.slice(0, 137).trimEnd()}${cleaned.length > 137 ? '...' : ''}`;
-}
+import { normalizeEntryDate } from './lib/dayCapture';
+import { getLogEntryByDate } from './lib/dayCaptureDb';
 
 export const list = query({
 	args: {},
@@ -23,7 +12,7 @@ export const list = query({
 
 		return await ctx.db
 			.query('logEntries')
-			.withIndex('by_clerk_id', (query) => query.eq('clerkId', clerkId))
+			.withIndex('by_clerk_id', (builder) => builder.eq('clerkId', clerkId))
 			.order('desc')
 			.collect();
 	},
@@ -36,12 +25,11 @@ export const getByDate = query({
 	handler: async (ctx, args) => {
 		const { clerkId } = await getCurrentUserInfo(ctx);
 
-		return await ctx.db
-			.query('logEntries')
-			.withIndex('by_clerk_id_entry_date', (query) =>
-				query.eq('clerkId', clerkId).eq('entryDate', args.entryDate),
-			)
-			.unique();
+		return await getLogEntryByDate(
+			ctx,
+			clerkId,
+			normalizeEntryDate(args.entryDate),
+		);
 	},
 });
 
@@ -52,18 +40,17 @@ export const listByRange = query({
 	},
 	handler: async (ctx, args) => {
 		const { clerkId } = await getCurrentUserInfo(ctx);
-		const rows = await ctx.db
+
+		return await ctx.db
 			.query('logEntries')
-			.withIndex('by_clerk_id_entry_date', (query) =>
-				query
+			.withIndex('by_clerk_id_and_entry_date', (builder) =>
+				builder
 					.eq('clerkId', clerkId)
-					.gte('entryDate', args.startDate)
-					.lte('entryDate', args.endDate),
+					.gte('entryDate', normalizeEntryDate(args.startDate))
+					.lte('entryDate', normalizeEntryDate(args.endDate)),
 			)
 			.order('desc')
 			.collect();
-
-		return rows;
 	},
 });
 
@@ -76,7 +63,7 @@ export const listRecent = query({
 
 		return await ctx.db
 			.query('logEntries')
-			.withIndex('by_clerk_id', (query) => query.eq('clerkId', clerkId))
+			.withIndex('by_clerk_id', (builder) => builder.eq('clerkId', clerkId))
 			.order('desc')
 			.take(args.limit);
 	},
@@ -88,7 +75,7 @@ export const listArchiveMonths = query({
 		const { clerkId } = await getCurrentUserInfo(ctx);
 		const rows = await ctx.db
 			.query('logEntries')
-			.withIndex('by_clerk_id', (query) => query.eq('clerkId', clerkId))
+			.withIndex('by_clerk_id', (builder) => builder.eq('clerkId', clerkId))
 			.order('desc')
 			.collect();
 
@@ -99,12 +86,12 @@ export const listArchiveMonths = query({
 
 		for (const row of rows) {
 			const monthKey = row.entryDate.slice(0, 7);
-			const existing = months.get(monthKey);
+			const current = months.get(monthKey);
 
-			if (existing) {
-				existing.count += 1;
-				if (row.entryDate > existing.latestEntryDate) {
-					existing.latestEntryDate = row.entryDate;
+			if (current) {
+				current.count += 1;
+				if (row.entryDate > current.latestEntryDate) {
+					current.latestEntryDate = row.entryDate;
 				}
 			} else {
 				months.set(monthKey, {
@@ -119,73 +106,5 @@ export const listArchiveMonths = query({
 			count: value.count,
 			latestEntryDate: value.latestEntryDate,
 		}));
-	},
-});
-
-export const create = mutation({
-	args: {
-		entryDate: v.string(),
-		rawInput: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const trimmedInput = args.rawInput.trim();
-
-		if (trimmedInput.length < MIN_ENTRY_LENGTH) {
-			throw new Error('Please write at least 10 characters about your day.');
-		}
-
-		const { clerkId } = await getCurrentUserInfo(ctx);
-		const now = Date.now();
-
-		return await ctx.db.insert('logEntries', {
-			clerkId,
-			entryDate: args.entryDate,
-			rawInput: trimmedInput,
-			summary: deriveSummary(trimmedInput),
-			createdAt: now,
-			updatedAt: now,
-		});
-	},
-});
-
-export const upsert = mutation({
-	args: {
-		entryDate: v.string(),
-		rawInput: v.string(),
-	},
-	handler: async (ctx, args) => {
-		const trimmedInput = args.rawInput.trim();
-
-		if (trimmedInput.length < MIN_ENTRY_LENGTH) {
-			throw new Error('Please write at least 10 characters about your day.');
-		}
-
-		const { clerkId } = await getCurrentUserInfo(ctx);
-		const now = Date.now();
-		const existing = await ctx.db
-			.query('logEntries')
-			.withIndex('by_clerk_id_entry_date', (query) =>
-				query.eq('clerkId', clerkId).eq('entryDate', args.entryDate),
-			)
-			.unique();
-
-		if (existing) {
-			await ctx.db.patch(existing._id, {
-				rawInput: trimmedInput,
-				summary: deriveSummary(trimmedInput),
-				updatedAt: now,
-			});
-
-			return existing._id;
-		}
-
-		return await ctx.db.insert('logEntries', {
-			clerkId,
-			entryDate: args.entryDate,
-			rawInput: trimmedInput,
-			summary: deriveSummary(trimmedInput),
-			createdAt: now,
-			updatedAt: now,
-		});
 	},
 });
