@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>Features — receipts</title>
+	<title>Features — receipts.cv</title>
 	<meta
 		name="description"
-		content="Everything receipts does for your career record — plain-language logging, AI structuring, a personal timeline, and review-ready reports."
+		content="Everything receipts.cv does for your career record — plain-language logging, AI structuring, a personal timeline, and review-ready reports."
 	/>
 </svelte:head>
 

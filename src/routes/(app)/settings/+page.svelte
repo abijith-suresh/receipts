@@ -3,7 +3,12 @@
 	import { useConvexClient, useQuery } from 'convex-svelte';
 	import { useClerkContext } from 'svelte-clerk';
 
+	import { resolveClerkPaths } from '$lib/auth/clerkPaths';
 	import { convexAuthReady } from '$lib/auth/convexAuth';
+	import {
+		clearSignOutRedirectPending,
+		markSignOutRedirectPending,
+	} from '$lib/auth/signOutFlow';
 	import SettingField from '$lib/components/settings/SettingField.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { api } from '$lib/convex';
@@ -16,7 +21,7 @@
 
 	const clerk = useClerkContext();
 	const convex = useConvexClient();
-	const signOutRedirectUrl = env.PUBLIC_CLERK_AFTER_SIGN_OUT_URL || '/';
+	const { signOutRedirectUrl } = resolveClerkPaths(env);
 	
 	const displayName = $derived(clerk.user?.fullName || clerk.user?.firstName || 'Your account');
 	const emailAddress = $derived(clerk.user?.primaryEmailAddress?.emailAddress || clerk.user?.emailAddresses?.[0]?.emailAddress || 'Signed in with Clerk');
@@ -101,7 +106,14 @@
 
 	async function handleSignOut() {
 		if (!clerk.clerk) return;
-		await clerk.clerk.signOut({ redirectUrl: signOutRedirectUrl });
+
+		try {
+			markSignOutRedirectPending();
+			await clerk.clerk.signOut({ redirectUrl: signOutRedirectUrl });
+		} catch (error) {
+			clearSignOutRedirectPending();
+			throw error;
+		}
 	}
 </script>
 

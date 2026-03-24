@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>Changelog — receipts</title>
+	<title>Changelog — receipts.cv</title>
 	<meta
 		name="description"
-		content="What's new in receipts — product updates, improvements, and release notes."
+		content="What's new in receipts.cv — product updates, improvements, and release notes."
 	/>
 </svelte:head>
 
@@ -16,7 +16,7 @@
 			What's new.
 		</h1>
 		<p class="text-muted text-base sm:text-lg">
-			Every update to receipts, in reverse chronological order.
+			Every update to Receipts, in reverse chronological order.
 		</p>
 	</div>
 </section>
@@ -70,7 +70,7 @@
 				<span class="entry-date">February 2026</span>
 			</div>
 			<div class="entry-title">Initial launch — the core logging loop</div>
-			<p class="entry-desc">The first version of receipts is live.</p>
+			<p class="entry-desc">The first version of Receipts is live.</p>
 			<ul class="entry-bullets">
 				<li>
 					<span class="bullet-dot"></span>
@@ -108,7 +108,7 @@
 			</div>
 			<div class="entry-title">Project started</div>
 			<p class="entry-desc">
-				receipts began as a personal tool — a way to remember what actually happened at work,
+				Receipts began as a personal tool — a way to remember what actually happened at work,
 				week to week.
 			</p>
 			<p class="entry-desc" style="margin-bottom: 0;">

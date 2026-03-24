@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import BrandWordmark from '$lib/components/BrandWordmark.svelte';
 
 	let mobileOpen = $state(false);
 
@@ -24,14 +25,17 @@
 
 <nav class="sticky top-0 z-50 border-b border-border bg-canvas/95 backdrop-blur-sm">
 	<div class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-		<!-- Logo wordmark -->
-		<a href="/" class="flex items-center gap-2 shrink-0" onclick={closeMobile}>
-			<span class="flex h-6 w-6 items-center justify-center rounded-full bg-ink text-[0.6875rem] font-semibold text-surface">r</span>
-			<span class="font-display italic text-xl text-ink" style="letter-spacing: -0.01em">receipts</span>
-		</a>
+		<div class="shrink-0">
+			<BrandWordmark
+				href="/"
+				size="md"
+				descriptor="Your private proof of work"
+				descriptorHiddenOnMobile={true}
+			/>
+		</div>
 
 		<!-- Desktop nav -->
-		<div class="hidden ml-auto items-center gap-1 md:flex">
+		<div class="ml-auto hidden items-center gap-1 md:flex">
 			{#each navLinks as link}
 				<a
 					href={link.href}
@@ -51,16 +55,16 @@
 
 		<!-- Desktop CTAs -->
 		<div class="hidden items-center gap-1 md:flex">
-		<a
-			href="/login"
-			class="rounded-full px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
-		>
-			Sign in
-		</a>
-		<a
-			href="/login"
-			class="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
-		>
+			<a
+				href="/login"
+				class="rounded-full px-4 py-2 text-sm text-muted transition-colors duration-150 hover:text-ink"
+			>
+				Sign in
+			</a>
+			<a
+				href="/login"
+				class="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white transition-all duration-150 hover:bg-brand-strong"
+			>
 				Get started
 			</a>
 		</div>
@@ -112,10 +116,10 @@
 					</a>
 				{/each}
 				<div class="mt-2 border-t border-border pt-2">
-				<a
-					href="/login"
-					onclick={closeMobile}
-					class="block rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:text-ink"
+					<a
+						href="/login"
+						onclick={closeMobile}
+						class="block rounded-lg px-3 py-2.5 text-sm text-muted transition-colors hover:text-ink"
 					>
 						Sign in
 					</a>

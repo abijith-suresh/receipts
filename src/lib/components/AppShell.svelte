@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 
 	import AccountMenu from '$lib/components/AccountMenu.svelte';
+	import BrandWordmark from '$lib/components/BrandWordmark.svelte';
 
 	const { children } = $props<{
 		children: () => unknown;
@@ -30,12 +31,7 @@
 <div class="shell">
 	<aside class="sidebar">
 		<div class="sidebar-top">
-		<a class="logo" href="/dashboard">
-			<span class="logo-copy">
-				<span class="logo-text">receipts</span>
-				<span class="logo-subtitle">Prove your worth.</span>
-			</span>
-		</a>
+			<BrandWordmark href="/dashboard" size="md" descriptor="Private proof of work" />
 
 		<nav class="sidebar-nav">
 			<a class:selected={isActive(navItems[0].href, navItems[0].view)} class="sidebar-nav-link" href={navItems[0].href}>
@@ -57,11 +53,7 @@
 
 	<main class="content">
 		<div class="mobile-shell-top">
-		<a class="logo mobile-logo" href="/dashboard">
-			<span class="logo-copy">
-				<span class="logo-text">receipts</span>
-			</span>
-		</a>
+			<BrandWordmark href="/dashboard" size="sm" />
 			<AccountMenu compact menuDirection="down" />
 		</div>
 
@@ -116,33 +108,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 2.5rem;
-}
-
-.logo {
-	display: inline-flex;
-	align-items: center;
-	text-decoration: none;
-}
-
-.logo-copy {
-	display: flex;
-	flex-direction: column;
-	gap: 0.1rem;
-}
-
-.logo-text {
-	font-family: var(--font-display);
-	font-style: italic;
-	font-size: 1.2rem;
-	font-weight: 400;
-	color: var(--color-ink);
-	line-height: 1.2;
-}
-
-.logo-subtitle {
-	font-size: 0.75rem;
-	color: var(--color-muted);
-	letter-spacing: 0.01em;
 }
 
 .sidebar-nav {

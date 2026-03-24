@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>receipts.cv — Prove your worth. Show your receipts.</title>
+	<title>receipts.cv — Your private proof of work</title>
 	<meta
 		name="description"
-		content="Log your day in plain language. receipts turns your work notes into a structured career record — ready for 1-on-1s, performance reviews, and raise conversations."
+		content="Log your day in plain language. receipts.cv turns your work notes into a structured career record — ready for 1-on-1s, performance reviews, and raise conversations."
 	/>
 </svelte:head>
 

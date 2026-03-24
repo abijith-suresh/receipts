@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
 	import { useClerkContext } from 'svelte-clerk';
+	import BrandWordmark from '$lib/components/BrandWordmark.svelte';
 	import { resolveClerkPaths } from '$lib/auth/clerkPaths';
 
 	type Step = 'initial' | 'otp';
@@ -186,9 +187,11 @@
 						Your private proof of work
 					</p>
 
-					<h1 class="auth-headline">receipts</h1>
+					<h1 class="auth-headline">
+						<BrandWordmark as="span" size="hero" />
+					</h1>
 
-					<p class="auth-subheading">Prove your worth. Show your receipts.</p>
+					<p class="auth-subheading">Build a private record of your work, wins, and impact.</p>
 
 					<button
 						type="button"
@@ -370,24 +373,21 @@
 	.auth-headline {
 		margin-top: 1.5rem;
 		margin-bottom: 0;
-		font-family: var(--font-display);
-		font-style: italic;
-		font-size: 3rem;
-		line-height: 1.05;
-		letter-spacing: -0.02em;
-		color: var(--color-ink);
+		line-height: 1;
 	}
 
-	@media (min-width: 640px) {
-		.auth-headline {
-			font-size: 3.5rem;
-		}
+	.auth-headline :global(.brand) {
+		display: inline-flex;
 	}
 
 	.auth-headline--otp {
+		font-family: var(--font-display);
 		font-style: normal;
 		font-size: 2rem;
 		margin-top: 0;
+		line-height: 1.05;
+		letter-spacing: -0.02em;
+		color: var(--color-ink);
 	}
 
 	@media (min-width: 640px) {

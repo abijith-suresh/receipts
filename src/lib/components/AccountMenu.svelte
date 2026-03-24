@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { env } from '$env/dynamic/public';
 	import { useClerkContext } from 'svelte-clerk';
 	import { fade } from 'svelte/transition';
+	import { resolveClerkPaths } from '$lib/auth/clerkPaths';
+	import {
+		clearSignOutRedirectPending,
+		markSignOutRedirectPending,
+	} from '$lib/auth/signOutFlow';
 	let { compact = false, menuDirection = 'up' }: { compact?: boolean; menuDirection?: 'up' | 'down' } = $props();
 
 	const clerk = useClerkContext();
+	const { signOutRedirectUrl } = resolveClerkPaths(env);
 
 	let menuOpen = $state(false);
 	let isSigningOut = $state(false);
@@ -39,13 +44,12 @@
 		isSigningOut = true;
 		closeMenu();
 
-		const signOutRedirectUrl = env.PUBLIC_CLERK_AFTER_SIGN_OUT_URL || '/';
-
 		try {
+			markSignOutRedirectPending();
 			await clerk.clerk.signOut({ redirectUrl: signOutRedirectUrl });
-			if (browser) {
-				await goto(signOutRedirectUrl);
-			}
+		} catch (error) {
+			clearSignOutRedirectPending();
+			throw error;
 		} finally {
 			isSigningOut = false;
 		}

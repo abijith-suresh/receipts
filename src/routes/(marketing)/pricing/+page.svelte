@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Pricing — receipts</title>
+	<title>Pricing — receipts.cv</title>
 	<meta
 		name="description"
 		content="Simple, honest pricing. Free forever for the core habit. Upgrade to Pro for unlimited AI report generation."

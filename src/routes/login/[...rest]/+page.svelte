@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — receipts</title>
+	<title>Sign in — receipts.cv</title>
 	<meta
 		name="description"
 		content="Sign in or create an account to start building a private record of your work, wins, and impact."
