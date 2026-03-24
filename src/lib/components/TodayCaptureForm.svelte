@@ -1,51 +1,44 @@
 <script lang="ts">
 	import { useConvexClient } from 'convex-svelte';
-	import { slide } from 'svelte/transition';
 
-	import { api, type LogEntry } from '$lib/convex';
-	import { validateEntry } from '$lib/utils/entries';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { api } from '$lib/convex';
 
 	const convex = useConvexClient();
 
 	let {
 		entryDate,
-		entry,
+		disabled = false,
 		onSaved,
 	}: {
 		entryDate: string;
-		entry: LogEntry | null | undefined;
-		onSaved?: (entryDate: string) => void;
+		disabled?: boolean;
+		onSaved?: () => void;
 	} = $props();
 
-	let rawInput = $state('');
+	let content = $state('');
 	let errorMessage = $state<string | null>(null);
 	let isSaving = $state(false);
-	let showDateField = $state(false);
 	let textareaElement = $state<HTMLTextAreaElement | null>(null);
 
 	$effect(() => {
-		rawInput = entry?.rawInput ?? '';
-		errorMessage = null;
-	});
-
-	$effect(() => {
-		if (textareaElement && rawInput !== undefined) {
+		if (textareaElement) {
 			autoResize();
 		}
 	});
 
 	function autoResize() {
-		if (textareaElement) {
-			textareaElement.style.height = 'auto';
-			textareaElement.style.height = textareaElement.scrollHeight + 'px';
+		if (!textareaElement) {
+			return;
 		}
+
+		textareaElement.style.height = 'auto';
+		textareaElement.style.height = `${textareaElement.scrollHeight}px`;
 	}
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
-
-		errorMessage = validateEntry(rawInput);
+		errorMessage = validateNote(content);
 
 		if (errorMessage) {
 			return;
@@ -54,45 +47,58 @@
 		isSaving = true;
 
 		try {
-			await convex.mutation(api.logEntries.upsert, {
+			await convex.mutation(api.dayCapture.addDayNote, {
 				entryDate,
-				rawInput,
+				content,
 			});
-
-			onSaved?.(entryDate);
+			content = '';
+			errorMessage = null;
+			onSaved?.();
 		} catch (error) {
-			errorMessage = error instanceof Error ? error.message : 'Unable to save your receipt right now.';
+			errorMessage =
+				error instanceof Error
+					? error.message
+					: 'Unable to save your note right now.';
 		} finally {
 			isSaving = false;
 		}
+	}
+
+	function validateNote(value: string) {
+		const trimmed = value.trim();
+
+		if (trimmed.length < 3) {
+			return 'Write at least 3 characters for each note.';
+		}
+
+		if (trimmed.length > 600) {
+			return 'Keep each note under 600 characters.';
+		}
+
+		return null;
 	}
 </script>
 
 <form class="capture-form" onsubmit={handleSubmit}>
 	<div class="capture-header">
-		<span class="capture-state">{entry ? 'Saved draft loaded' : 'Not saved yet'}</span>
-		<button type="button" class="date-link" onclick={() => (showDateField = !showDateField)}>
-			{showDateField ? 'Hide date' : 'Change date'}
-		</button>
+		<div>
+			<span class="capture-state">Add note</span>
+			<p class="capture-helper">
+				Capture a win, blocker, meeting outcome, or fragment while it is still fresh.
+			</p>
+		</div>
+		<span class="date-pill">{entryDate}</span>
 	</div>
 
-	{#if showDateField}
-		<div transition:slide={{ duration: 220 }}>
-			<div class="date-field">
-				<label class="field-label" for="entry-date">Entry date</label>
-				<input id="entry-date" class="field-input" type="date" bind:value={entryDate} />
-			</div>
-		</div>
-	{/if}
-
-	<label class="sr-only" for="raw-input">What moved forward today?</label>
+	<label class="sr-only" for="today-note-content">Add a note for today</label>
 	<textarea
-		id="raw-input"
+		id="today-note-content"
 		class="field-textarea"
-		placeholder="Write it the way you would say it. Shipments, meetings, blockers, wins, loose notes — it all counts."
-		bind:value={rawInput}
+		placeholder="Finished the migration, paired on the failing test, follow-up still blocked on copy review..."
+		bind:value={content}
 		bind:this={textareaElement}
 		oninput={autoResize}
+		disabled={disabled || isSaving}
 	></textarea>
 
 	{#if errorMessage}
@@ -100,9 +106,9 @@
 	{/if}
 
 	<div class="form-footer">
-		<span class="char-count">{rawInput.trim().length} chars</span>
-		<Button type="submit" disabled={isSaving}>
-			{isSaving ? 'Saving…' : entry ? 'Update receipt' : 'Save receipt'}
+		<span class="char-count">{content.trim().length} chars</span>
+		<Button type="submit" disabled={disabled || isSaving}>
+			{isSaving ? 'Adding…' : 'Add note'}
 		</Button>
 	</div>
 </form>
@@ -111,53 +117,53 @@
 .capture-form {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-	padding: 1rem;
-	border-radius: 1rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-surface);
+	gap: 0.9rem;
+	padding: 1.25rem;
+	border-radius: 1.15rem;
+	border: 1px solid color-mix(in srgb, var(--color-border) 88%, var(--color-brand-muted));
+	background: linear-gradient(
+		180deg,
+		color-mix(in srgb, var(--color-surface) 92%, white) 0%,
+		var(--color-surface) 100%
+	);
+	box-shadow: var(--shadow-sm);
 }
 
 .capture-header {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 	justify-content: space-between;
 	gap: 1rem;
 }
 
-.date-link {
-	border: none;
-	padding: 0;
-	background: transparent;
-	font-size: 0.75rem;
-	font-weight: 600;
-	color: var(--color-ink);
-	cursor: pointer;
-	transition: color 0.15s ease;
-}
-
-.date-link:hover {
-	color: var(--color-brand-strong);
-}
-
 .capture-state {
-	font-size: 0.75rem;
-	color: var(--color-muted);
-}
-
-.date-field {
-	display: flex;
-	flex-direction: column;
-	gap: 0.375rem;
-	max-width: 12rem;
-}
-
-.field-label {
-	font-size: 0.75rem;
+	display: inline-block;
+	font-size: 0.72rem;
 	font-weight: 700;
 	letter-spacing: 0.18em;
 	text-transform: uppercase;
 	color: var(--color-brand-strong);
+	margin-bottom: 0.35rem;
+}
+
+.capture-helper {
+	margin: 0;
+	max-width: 34rem;
+	font-size: 0.9rem;
+	line-height: 1.55;
+	color: var(--color-muted);
+}
+
+.date-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.45rem 0.7rem;
+	border-radius: 9999px;
+	background: color-mix(in srgb, var(--color-brand-soft) 82%, white);
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--color-brand-strong);
+	white-space: nowrap;
 }
 
 .sr-only {
@@ -172,48 +178,26 @@
 	border: 0;
 }
 
-.field-input {
-	width: 100%;
-	box-sizing: border-box;
-	padding: 0.625rem 0.75rem;
-	border-radius: 0.75rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-canvas);
-	color: var(--color-ink);
-	font-size: 0.875rem;
-	outline: none;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
-}
-
-.field-input:focus {
-	border-color: var(--color-brand);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 14%, transparent);
-}
-
 .field-textarea {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 0.875rem 1rem;
-	border-radius: 0.75rem;
-	border: 1px solid var(--color-border);
-	background: var(--color-canvas);
+	padding: 0.95rem 1rem;
+	border-radius: 0.95rem;
+	border: 1px solid color-mix(in srgb, var(--color-border) 85%, var(--color-brand-soft));
+	background: color-mix(in srgb, var(--color-canvas) 88%, white);
 	color: var(--color-ink);
-	font-size: 1rem;
+	font-size: 0.98rem;
 	line-height: 1.75;
-	min-height: 8rem;
-	max-height: 16rem;
+	min-height: 7.5rem;
+	max-height: 18rem;
 	resize: none;
 	overflow-y: auto;
 	outline: none;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
 }
 
 .field-textarea:focus {
 	border-color: var(--color-brand);
+	background: var(--color-surface);
 	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 14%, transparent);
 }
 
@@ -222,14 +206,19 @@
 	opacity: 0.72;
 }
 
+.field-textarea:disabled {
+	opacity: 0.72;
+	cursor: not-allowed;
+}
+
 .error-msg {
 	margin: 0;
 	padding: 0.625rem 0.875rem;
 	border-radius: 0.75rem;
-	border: 1px solid #fecaca;
-	background: #fef2f2;
+	border: 1px solid var(--color-error-border);
+	background: var(--color-error-bg);
 	font-size: 0.75rem;
-	color: #b91c1c;
+	color: var(--color-error);
 }
 
 .form-footer {
@@ -242,5 +231,22 @@
 .char-count {
 	font-size: 0.75rem;
 	color: var(--color-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+	.capture-form {
+		padding: 1rem;
+	}
+
+	.capture-header,
+	.form-footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.form-footer :global(.btn) {
+		width: 100%;
+	}
 }
 </style>

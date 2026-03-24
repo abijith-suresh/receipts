@@ -3,6 +3,51 @@ import { makeFunctionReference } from 'convex/server';
 import type { HistoryView } from '$lib/history/preferences';
 import type { WeekStartsOn } from '$lib/utils/date';
 
+export type TodayNote = {
+	_id: string;
+	_creationTime: number;
+	clerkId: string;
+	entryDate: string;
+	content: string;
+	createdAt: number;
+	isArchived: boolean;
+};
+
+export type LogEntry = {
+	_id: string;
+	_creationTime: number;
+	clerkId: string;
+	entryDate: string;
+	rawInput: string;
+	summary: string;
+	tasksCompleted?: string[];
+	skillsDemonstrated?: string[];
+	impact?: string | null;
+	blockers?: string | null;
+	tags?: string[];
+	isDirty: boolean;
+	lastSynthesizedAt?: number;
+	noteCount?: number;
+	createdAt: number;
+	updatedAt: number;
+};
+
+export type TodayState = {
+	entryDate: string;
+	dayNotes: TodayNote[];
+	logEntry: LogEntry | null;
+	noteCount: number;
+	hasSynthesizedEntry: boolean;
+	state: 'empty' | 'collecting' | 'summarized';
+	dirtyPrompt: {
+		isDirty: boolean;
+		isDismissed: boolean;
+		shouldPrompt: boolean;
+		digest: string | null;
+		latestUpdatedAt: number;
+	};
+};
+
 export const api = {
 	users: {
 		ensureCurrentUser: makeFunctionReference<
@@ -50,82 +95,65 @@ export const api = {
 			}
 		>('users:updateSettings'),
 	},
-	logEntries: {
-		list: makeFunctionReference<
-			'query',
-			Record<string, never>,
-			Array<{
-				_id: string;
-				_creationTime: number;
-				clerkId: string;
-				entryDate: string;
-				rawInput: string;
-				summary: string;
-				createdAt: number;
-				updatedAt: number;
-			}>
-		>('logEntries:list'),
-		getByDate: makeFunctionReference<
+	dayCapture: {
+		addDayNote: makeFunctionReference<
+			'mutation',
+			{ entryDate: string; content?: string; body?: string; rawInput?: string },
+			string
+		>('dayCapture:addDayNote'),
+		getDayNotes: makeFunctionReference<
 			'query',
 			{ entryDate: string },
-			{
-				_id: string;
-				_creationTime: number;
-				clerkId: string;
-				entryDate: string;
-				rawInput: string;
-				summary: string;
-				createdAt: number;
-				updatedAt: number;
-			} | null
-		>('logEntries:getByDate'),
-		listByRange: makeFunctionReference<
+			TodayNote[]
+		>('dayCapture:getDayNotes'),
+		getTodayState: makeFunctionReference<
 			'query',
-			{ startDate: string; endDate: string },
-			Array<{
-				_id: string;
-				_creationTime: number;
-				clerkId: string;
-				entryDate: string;
-				rawInput: string;
-				summary: string;
-				createdAt: number;
-				updatedAt: number;
-			}>
-		>('logEntries:listByRange'),
-		listRecent: makeFunctionReference<
-			'query',
-			{ limit: number },
-			Array<{
-				_id: string;
-				_creationTime: number;
-				clerkId: string;
-				entryDate: string;
-				rawInput: string;
-				summary: string;
-				createdAt: number;
-				updatedAt: number;
-			}>
-		>('logEntries:listRecent'),
-		listArchiveMonths: makeFunctionReference<
-			'query',
-			Record<string, never>,
-			Array<{
-				month: string;
-				count: number;
-				latestEntryDate: string;
-			}>
-		>('logEntries:listArchiveMonths'),
+			{ entryDate?: string },
+			TodayState
+		>('dayCapture:getTodayState'),
+		dismissDirtyPrompt: makeFunctionReference<
+			'mutation',
+			{ entryDate: string },
+			null
+		>('dayCapture:dismissDirtyPrompt'),
+		triggerSynthesis: makeFunctionReference<
+			'action',
+			{ entryDate: string },
+			{ entryDate: string; noteCount: number }
+		>('dayCaptureActions:synthesizeDayCapture'),
+	},
+	logEntries: {
 		create: makeFunctionReference<
 			'mutation',
 			{ entryDate: string; rawInput: string },
 			string
-		>('logEntries:create'),
+		>('dayCapture:addDayNote'),
 		upsert: makeFunctionReference<
 			'mutation',
 			{ entryDate: string; rawInput: string },
 			string
-		>('logEntries:upsert'),
+		>('dayCapture:addDayNote'),
+		list: makeFunctionReference<'query', Record<string, never>, LogEntry[]>(
+			'logEntries:list',
+		),
+		getByDate: makeFunctionReference<
+			'query',
+			{ entryDate: string },
+			LogEntry | null
+		>('logEntries:getByDate'),
+		listByRange: makeFunctionReference<
+			'query',
+			{ startDate: string; endDate: string },
+			LogEntry[]
+		>('logEntries:listByRange'),
+		listRecent: makeFunctionReference<'query', { limit: number }, LogEntry[]>(
+			'logEntries:listRecent',
+		),
+		listArchiveMonths: makeFunctionReference<
+			'query',
+			Record<string, never>,
+			Array<{ month: string; count: number; latestEntryDate: string }>
+		>('logEntries:listArchiveMonths'),
 	},
 } as const;
 
@@ -143,5 +171,4 @@ export type UserRecord = {
 	updatedAt: number;
 };
 
-export type LogEntry = (typeof api.logEntries.list)['_returnType'][number];
 export type UserSettings = (typeof api.users.settings)['_returnType'];

@@ -8,7 +8,12 @@
  * @module
  */
 
+import type * as dayCapture from "../dayCapture.js";
+import type * as dayCaptureActions from "../dayCaptureActions.js";
 import type * as lib_auth from "../lib/auth.js";
+import type * as lib_dayCapture from "../lib/dayCapture.js";
+import type * as lib_dayCaptureDb from "../lib/dayCaptureDb.js";
+import type * as lib_dayCaptureSynthesis from "../lib/dayCaptureSynthesis.js";
 import type * as logEntries from "../logEntries.js";
 import type * as users from "../users.js";
 
@@ -19,7 +24,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  dayCapture: typeof dayCapture;
+  dayCaptureActions: typeof dayCaptureActions;
   "lib/auth": typeof lib_auth;
+  "lib/dayCapture": typeof lib_dayCapture;
+  "lib/dayCaptureDb": typeof lib_dayCaptureDb;
+  "lib/dayCaptureSynthesis": typeof lib_dayCaptureSynthesis;
   logEntries: typeof logEntries;
   users: typeof users;
 }>;
